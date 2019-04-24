@@ -1,0 +1,30 @@
+package com.fanniemae.starapp.commons;
+
+public interface MessageConstants {
+
+    String DEFAULT_ERROR_KEY = "default";
+    String DEFAULT_ERROR_CODE = "9000";
+    String DEFAULT_MESSAGE = "Unable to proceed with the request!";
+
+
+    String CODE_GWERROR_ROUTE_NOT_FOUND = "R3GW40009";
+    String CODE_GWERROR_ATTEMPT_ACCESS = "R3GW40010";
+
+
+    String CODE_UNAUTHORIZED_ACCESS_KEY = "R3AP4000";
+    String CODE_INCOMPLETE_REQUEST_ERROR = "R3AP4001";
+    String CODE_EXECUTION_ERROR = "R3AP4002";
+
+    String CODE_R3DB7000_INCOMPLETE_RECORD_ERROR = "R3DB7000";
+    String CODE_R3DB7001_EXECUTION_ERROR = "R3DB7001";
+    String CODE_R3DB7002_NORECORD_ERROR = "R3DB7002";
+
+
+    String CODE_PROVIDER_EXECUTION_ERROR = "R3PR8000";
+
+
+    String CODE_SMS_SEND_ALERTFAILED = "R3PR8200";
+    String CODE_SMS_ERROR_REPLY = "R3PR8201";
+
+    String CODE_FILE_ERROR = "R3PR8100";
+}
