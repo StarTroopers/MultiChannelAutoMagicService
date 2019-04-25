@@ -128,7 +128,11 @@
 			<artifactId>gson</artifactId>
 			<version>${gson.version}</version>
 		</dependency>
-
+		<dependency>
+			<groupId>com.taskadapter</groupId>
+			<artifactId>trello-java-wrapper</artifactId>
+			<version>0.13</version>
+		</dependency>
 		<dependency>
 			<groupId>io.springfox</groupId>
 			<artifactId>springfox-swagger2</artifactId>
