@@ -34,11 +34,18 @@ public class SMSMessageHandlerService extends BaseSMService {
         final boolean result =  true; //smsMessageLogDao.createMessageLog(request, traceId);
         if(result){
 
+            final String message = request.getBody();
+
             //TODO: Need to invoke message body processing
+
+
+
 
             final SMSMessage successReply = new SMSMessageRequest();
             successReply.setBody("We received your message, Thank you!");
             return twilioSMSService.generateSMSReply(successReply, traceId);
+
+
 
         }else{
             // Will not throw an error but generate an error message as response

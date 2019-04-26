@@ -53,6 +53,7 @@ public class TwilioAlertSMSProvider extends BaseTwilioServiceProvider {
             }
 
         } catch (TwilioException ex) {
+            ex.printStackTrace();
             LOGGER.error("Error sending twilio message of {}. traceId is {}", ex, traceId);
             response.setStatus(false);
         }

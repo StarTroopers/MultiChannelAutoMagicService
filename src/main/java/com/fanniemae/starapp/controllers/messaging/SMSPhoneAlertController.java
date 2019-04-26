@@ -33,6 +33,12 @@ public class SMSPhoneAlertController extends BaseAppController {
     @Autowired
     private SMSMessageHandlerService smsMessageHandlerService;
 
+    /**
+     * Webhook API for Twilio to use when message is capture by the Twilio Number
+     * @param message
+     * @param traceId
+     * @return
+     */
     @PostMapping(value = "/message",
             consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE,
             produces = "application/xml")

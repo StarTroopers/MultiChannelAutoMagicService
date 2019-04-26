@@ -36,7 +36,7 @@ public class TwilioVerifyPhoneCheckProvider extends TwilioVerifyPhoneProvider {
 
             if("approved".equals(verifyCheck.getStatus()) && verifyCheck.getValid()){
 
-                response.setMessage("Pending verification");
+                response.setMessage("Successful");
                 response.setStatus(true);
                 response.setContent(createVerificationCheckResponse(verifyCheck));
             }
