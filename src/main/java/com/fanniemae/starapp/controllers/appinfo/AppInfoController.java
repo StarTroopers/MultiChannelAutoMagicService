@@ -32,8 +32,8 @@ public class AppInfoController {
     @Autowired
     Trello trelloApi;
 
-    @Value("${starapp.trello.receivedboardid}")
-    String receivedBoardId;
+    @Value("${starapp.trello.idlist}")
+    String idlist;
 
     @GetMapping("/status")
     public AppInfo getAppInfoStatus(){
@@ -55,7 +55,7 @@ public class AppInfoController {
 
     @PostMapping("/card")
     public Card createCardforBoard(@RequestBody Card card) {
-        return trelloApi.createCard(receivedBoardId, card);
+        return trelloApi.createCard(idlist, card);
     }
 
     @PutMapping("/card")

@@ -26,7 +26,7 @@ public class SMSMessageHandlerService extends BaseSMService {
      * @param request
      * @param traceId
      */
-    public MessageResponse handleSmsMessage(final SMSMessageRequest request, String traceId){
+    public MessageResponse handleSmsMessage(final SMSMessageRequest request, Long requestId, String traceId){
         LOGGER.info("Creating an SMS Message log. traceId of {}", traceId);
 
 
@@ -37,7 +37,7 @@ public class SMSMessageHandlerService extends BaseSMService {
             //TODO: Need to invoke message body processing
 
             final SMSMessage successReply = new SMSMessageRequest();
-            successReply.setBody("We received your message, Thank you!");
+            successReply.setBody("We received your message and created a request on behalf of you. Please use #"+requestId+" for furthur communication, Thank you!");
             return twilioSMSService.generateSMSReply(successReply, traceId);
 
         }else{

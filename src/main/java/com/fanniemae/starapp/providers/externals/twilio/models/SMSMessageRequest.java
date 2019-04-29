@@ -1,7 +1,12 @@
 package com.fanniemae.starapp.providers.externals.twilio.models;
 
+import javax.persistence.Entity;
+import javax.persistence.Id;
+
+@Entity
 public class SMSMessageRequest extends SMSMessage{
 
+    @Id
     private String accountSid;
     private String apiVersion;
 
