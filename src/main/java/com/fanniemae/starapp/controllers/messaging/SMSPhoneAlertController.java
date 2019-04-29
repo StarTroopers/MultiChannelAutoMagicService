@@ -16,7 +16,6 @@ import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
-import springfox.documentation.annotations.ApiIgnore;
 
 import java.util.Map;
 
@@ -43,7 +42,6 @@ public class SMSPhoneAlertController extends BaseAppController {
             consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE,
             produces = "application/xml")
     @SMSFeatureDoc(value = "Captures message from SMS")
-    @ApiIgnore
     public String handleSmsNotification(@RequestParam Map<String, String> message,
                                         @RequestHeader(name = AppHttpHeaders.TRACEID_HEADER, required = false)
                                         String traceId){
