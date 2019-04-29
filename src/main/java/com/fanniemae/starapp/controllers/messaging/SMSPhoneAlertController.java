@@ -5,19 +5,25 @@ import com.fanniemae.starapp.commons.AppHttpHeaders;
 import com.fanniemae.starapp.commons.MessageConstants;
 import com.fanniemae.starapp.controllers.BaseAppController;
 import com.fanniemae.starapp.controllers.request.SMSMessageBean;
+import com.fanniemae.starapp.domains.MultiChannelAutoMessage;
 import com.fanniemae.starapp.providers.externals.twilio.models.MessageResponse;
 import com.fanniemae.starapp.providers.externals.twilio.models.SMSMessage;
 import com.fanniemae.starapp.providers.externals.twilio.models.SMSMessageRequest;
+import com.fanniemae.starapp.repositories.MultiChannelAutoMessageRepository;
+import com.fanniemae.starapp.repositories.SMSMessageBeanRepository;
 import com.fanniemae.starapp.services.messaging.sms.SMSMessageHandlerService;
 import com.fanniemae.starapp.services.messaging.sms.TwilioSMSService;
 import com.fanniemae.starapp.swagger.SMSFeatureDoc;
+import com.julienvey.trello.Trello;
+import com.julienvey.trello.domain.Card;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.MediaType;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/sms-alert")
@@ -25,6 +31,8 @@ public class SMSPhoneAlertController extends BaseAppController {
 
     private static final Logger LOGGER = LogManager.getLogger(SMSPhoneAlertController.class);
 
+    @Value("${starapp.trello.idlist}")
+    String idlist;
 
     @Autowired
     private TwilioSMSService twilioSMSService;
@@ -32,14 +40,22 @@ public class SMSPhoneAlertController extends BaseAppController {
     @Autowired
     private SMSMessageHandlerService smsMessageHandlerService;
 
-    /**
+    @Autowired
+    SMSMessageBeanRepository smsMessageBeanRepository;
+
+    @Autowired
+    Trello trelloApi;
+
+    @Autowired
+    MultiChannelAutoMessageRepository multiChannelAutoMessageRepository;
+
+  /**
      * Webhook API for Twilio to use when message is capture by the Twilio Number
      * @param message
      * @param traceId
      * @return
      */
     @PostMapping(value = "/message",
-            consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE,
             produces = "application/xml")
     @SMSFeatureDoc(value = "Captures message from SMS")
     public String handleSmsNotification(@RequestParam Map<String, String> message,
@@ -71,11 +87,31 @@ public class SMSPhoneAlertController extends BaseAppController {
         smsMessage.setToCountry(message.get("ToCountry"));
         smsMessage.setToState(message.get("ToState"));
         smsMessage.setToZip(message.get("ToZip"));
-
+        smsMessageBeanRepository.save(smsMessage);
 
         LOGGER.info( "{}", smsMessage);
+        MultiChannelAutoMessage multiChannelAutoMessage;
+        String msgBody = smsMessage.getBody();
+        if(msgBody.contains("#")) {
+            int hashIndex = msgBody.indexOf("#");
+            Long msgId = Long.parseLong(msgBody.substring(hashIndex+1,msgBody.indexOf(" ", hashIndex) ));
+            Optional<MultiChannelAutoMessage> multiChannelAutoMessages = multiChannelAutoMessageRepository.findById(msgId);
+            multiChannelAutoMessage = multiChannelAutoMessages.get();
+            trelloApi.addCommentToCard(multiChannelAutoMessage.getCardId(),smsMessage.getBody().replace("#"+msgId,""));
 
-        final MessageResponse<String> response = smsMessageHandlerService.handleSmsMessage(smsMessage, traceId);
+        } else {
+            Card card = new Card();
+            card.setName(smsMessage.getBody());
+            card.setDesc(smsMessage.getBody());
+            card = trelloApi.createCard(idlist, card);
+
+            multiChannelAutoMessage = new MultiChannelAutoMessage();
+            multiChannelAutoMessage.setAccountsSid(smsMessage.getAccountSid());
+            multiChannelAutoMessage.setCardId(card.getId());
+
+            multiChannelAutoMessage = multiChannelAutoMessageRepository.save(multiChannelAutoMessage);
+        }
+        final MessageResponse<String> response = smsMessageHandlerService.handleSmsMessage(smsMessage, multiChannelAutoMessage.getId(),traceId);
 
         if(response.isStatus()){
             LOGGER.debug("Successful handling SMS Message from mobile! traceId is {}", traceId);

@@ -128,7 +128,11 @@
 			<artifactId>gson</artifactId>
 			<version>${gson.version}</version>
 		</dependency>
-
+		<dependency>
+			<groupId>com.taskadapter</groupId>
+			<artifactId>trello-java-wrapper</artifactId>
+			<version>0.13</version>
+		</dependency>
 		<dependency>
 			<groupId>io.springfox</groupId>
 			<artifactId>springfox-swagger2</artifactId>
@@ -140,9 +144,15 @@
 			<version>${swagger.version}</version>
 		</dependency>
 		<!-- Swagger: END -->
-
-
-
+		<dependency>
+			<groupId>com.h2database</groupId>
+			<artifactId>h2</artifactId>
+			<scope>runtime</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-data-jpa</artifactId>
+		</dependency>
 
 
 	</dependencies>
