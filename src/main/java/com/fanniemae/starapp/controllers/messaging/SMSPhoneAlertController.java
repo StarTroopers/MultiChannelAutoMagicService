@@ -57,8 +57,7 @@ public class SMSPhoneAlertController extends BaseAppController {
     @SMSFeatureDoc(value = "Captures message from SMS")
     public String handleSmsNotification(@RequestParam Map<String, String> message,
                                         @RequestHeader(name = AppHttpHeaders.TRACEID_HEADER, required = false)
-                                                String traceId,
-                                        @RequestHeader(name="Accept-Language",required = false) Locale locale) {
+                                                String traceId) {
 
         LOGGER.debug("Handling SMS Message from mobile!");
 
@@ -109,7 +108,7 @@ public class SMSPhoneAlertController extends BaseAppController {
 
             multiChannelAutoMessage = multiChannelAutoMessageRepository.save(multiChannelAutoMessage);
         }
-        final MessageResponse<String> response = smsMessageHandlerService.handleSmsMessage(smsMessage, multiChannelAutoMessage.getId(), locale, traceId);
+        final MessageResponse<String> response = smsMessageHandlerService.handleSmsMessage(smsMessage, multiChannelAutoMessage.getId(), traceId);
 
         if (response.isStatus()) {
             LOGGER.debug("Successful handling SMS Message from mobile! traceId is {}", traceId);

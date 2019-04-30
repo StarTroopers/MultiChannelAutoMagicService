@@ -31,7 +31,7 @@ public class SMSMessageHandlerService extends BaseSMService {
      * @param request
      * @param traceId
      */
-    public MessageResponse handleSmsMessage(final SMSMessageRequest request, Long requestId, Locale locale, String traceId) {
+    public MessageResponse handleSmsMessage(final SMSMessageRequest request, Long requestId, String traceId) {
         LOGGER.info("Creating an SMS Message log. traceId of {}", traceId);
 
 
@@ -45,7 +45,7 @@ public class SMSMessageHandlerService extends BaseSMService {
 
 
             final SMSMessage successReply = new SMSMessageRequest();
-            MessageFormat mf = new MessageFormat(messageSource.getMessage("starapp.twillio.acknoledgement", null, locale));
+            MessageFormat mf = new MessageFormat(messageSource.getMessage("starapp.twillio.acknoledgement", null, Locale.US));
             successReply.setBody(mf.format(new Object[]{requestId}));
             return twilioSMSService.generateSMSReply(successReply, traceId);
 
