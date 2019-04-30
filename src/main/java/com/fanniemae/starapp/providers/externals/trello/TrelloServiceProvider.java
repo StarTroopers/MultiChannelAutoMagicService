@@ -39,7 +39,22 @@ public class TrelloServiceProvider {
 
     @Bean
     public Trello createTrelloProvider() throws Exception {
+        HttpHost proxy = new HttpHost("104.129.194.41",10479);
 
-        return new TrelloImpl(key, accountAuthToken, new ApacheHttpClient());
+        DefaultProxyRoutePlanner routePlanner = new DefaultProxyRoutePlanner(proxy);
+
+        TrustStrategy acceptingTrustStrategy = (X509Certificate[] chain, String authType) -> true;
+
+        SSLContext sslContext = org.apache.http.ssl.SSLContexts.custom()
+                .loadTrustMaterial(null, acceptingTrustStrategy)
+                .build();
+
+        SSLConnectionSocketFactory csf = new SSLConnectionSocketFactory(sslContext);
+
+        HttpClient httpclient = HttpClients.custom()
+                .setSSLSocketFactory(csf)
+                .setRoutePlanner(routePlanner).build();
+        //HttpClient httpclient = HttpClients.custom().setSSLHostnameVerifier(new NoopHostnameVerifier()).setRoutePlanner(routePlanner).build();
+        return new TrelloImpl(key, accountAuthToken, new ApacheHttpClient(httpclient));
     }
 }

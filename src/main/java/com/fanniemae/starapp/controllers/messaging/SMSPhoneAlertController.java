@@ -22,6 +22,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 
@@ -33,24 +34,20 @@ public class SMSPhoneAlertController extends BaseAppController {
 
     @Value("${starapp.trello.idlist}")
     String idlist;
-
+    @Autowired
+    SMSMessageBeanRepository smsMessageBeanRepository;
+    @Autowired
+    Trello trelloApi;
+    @Autowired
+    MultiChannelAutoMessageRepository multiChannelAutoMessageRepository;
     @Autowired
     private TwilioSMSService twilioSMSService;
-
     @Autowired
     private SMSMessageHandlerService smsMessageHandlerService;
 
-    @Autowired
-    SMSMessageBeanRepository smsMessageBeanRepository;
-
-    @Autowired
-    Trello trelloApi;
-
-    @Autowired
-    MultiChannelAutoMessageRepository multiChannelAutoMessageRepository;
-
-  /**
+    /**
      * Webhook API for Twilio to use when message is capture by the Twilio Number
+     *
      * @param message
      * @param traceId
      * @return
@@ -60,7 +57,8 @@ public class SMSPhoneAlertController extends BaseAppController {
     @SMSFeatureDoc(value = "Captures message from SMS")
     public String handleSmsNotification(@RequestParam Map<String, String> message,
                                         @RequestHeader(name = AppHttpHeaders.TRACEID_HEADER, required = false)
-                                        String traceId){
+                                                String traceId,
+                                        @RequestHeader(name="Accept-Language",required = false) Locale locale) {
 
         LOGGER.debug("Handling SMS Message from mobile!");
 
@@ -89,15 +87,15 @@ public class SMSPhoneAlertController extends BaseAppController {
         smsMessage.setToZip(message.get("ToZip"));
         smsMessageBeanRepository.save(smsMessage);
 
-        LOGGER.info( "{}", smsMessage);
+        LOGGER.info("{}", smsMessage);
         MultiChannelAutoMessage multiChannelAutoMessage;
         String msgBody = smsMessage.getBody();
-        if(msgBody.contains("#")) {
+        if (msgBody.contains("#")) {
             int hashIndex = msgBody.indexOf("#");
-            Long msgId = Long.parseLong(msgBody.substring(hashIndex+1,msgBody.indexOf(" ", hashIndex) ));
+            Long msgId = Long.parseLong(msgBody.substring(hashIndex + 1, msgBody.indexOf(" ", hashIndex)));
             Optional<MultiChannelAutoMessage> multiChannelAutoMessages = multiChannelAutoMessageRepository.findById(msgId);
             multiChannelAutoMessage = multiChannelAutoMessages.get();
-            trelloApi.addCommentToCard(multiChannelAutoMessage.getCardId(),smsMessage.getBody().replace("#"+msgId,""));
+            trelloApi.addCommentToCard(multiChannelAutoMessage.getCardId(), smsMessage.getBody().replace("#" + msgId, ""));
 
         } else {
             Card card = new Card();
@@ -111,9 +109,9 @@ public class SMSPhoneAlertController extends BaseAppController {
 
             multiChannelAutoMessage = multiChannelAutoMessageRepository.save(multiChannelAutoMessage);
         }
-        final MessageResponse<String> response = smsMessageHandlerService.handleSmsMessage(smsMessage, multiChannelAutoMessage.getId(),traceId);
+        final MessageResponse<String> response = smsMessageHandlerService.handleSmsMessage(smsMessage, multiChannelAutoMessage.getId(), locale, traceId);
 
-        if(response.isStatus()){
+        if (response.isStatus()) {
             LOGGER.debug("Successful handling SMS Message from mobile! traceId is {}", traceId);
             return response.getContent();
         }
@@ -122,15 +120,14 @@ public class SMSPhoneAlertController extends BaseAppController {
     }
 
 
-
     @PostMapping(value = "/send-alert")
     @SMSFeatureDoc(value = "Sends a message to a given phone number")
     public void sendAlertMessage(@RequestBody SMSMessageBean messageRqst,
-                                 @RequestHeader(name = AppHttpHeaders.TRACEID_HEADER, required = false) String traceId){
+                                 @RequestHeader(name = AppHttpHeaders.TRACEID_HEADER, required = false) String traceId) {
 
         LOGGER.debug("Testing the generation of the alert! traceId of {}", traceId);
 
-        if(messageRqst == null || messageRqst.getMessage() == null || messageRqst.getToPhoneNumber() == null){
+        if (messageRqst == null || messageRqst.getMessage() == null || messageRqst.getToPhoneNumber() == null) {
             errorHandler.throwAppException(MessageConstants.CODE_INCOMPLETE_REQUEST_ERROR, AppErrorType.REQUEST_ERROR, null);
         }
 
@@ -144,18 +141,15 @@ public class SMSPhoneAlertController extends BaseAppController {
 
 
         final MessageResponse response = twilioSMSService.notifyUser(message, traceId);
-        if(response.isStatus()){
+        if (response.isStatus()) {
             LOGGER.debug("Successful generating an alert message! traceId is {}", traceId);
-        }else {
+        } else {
 
             LOGGER.error("Error generating an alert message! traceId is {}", traceId);
             errorHandler.throwAppException(MessageConstants.CODE_SMS_SEND_ALERTFAILED, AppErrorType.PROVIDER_ERROR, null);
         }
 
     }
-
-
-
 
 
 }

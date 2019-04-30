@@ -7,7 +7,11 @@ import com.fanniemae.starapp.providers.externals.twilio.models.SMSMessageRequest
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.MessageSource;
 import org.springframework.stereotype.Service;
+
+import java.text.MessageFormat;
+import java.util.Locale;
 
 /**
  * Service for handling incoming SMS
@@ -16,38 +20,37 @@ import org.springframework.stereotype.Service;
 public class SMSMessageHandlerService extends BaseSMService {
 
     private static final Logger LOGGER = LogManager.getLogger(SMSMessageHandlerService.class);
-
+    @Autowired
+    MessageSource messageSource;
     @Autowired
     private TwilioSMSService twilioSMSService;
 
-
     /**
      * Handle SMS message received
+     *
      * @param request
      * @param traceId
      */
-    public MessageResponse handleSmsMessage(final SMSMessageRequest request, Long requestId, String traceId){
+    public MessageResponse handleSmsMessage(final SMSMessageRequest request, Long requestId, Locale locale, String traceId) {
         LOGGER.info("Creating an SMS Message log. traceId of {}", traceId);
 
 
         //TODO: NEED TO STORE THE REQUEST IN DB. INVOKE DAO HERE
-        final boolean result =  true; //smsMessageLogDao.createMessageLog(request, traceId);
-        if(result){
+        final boolean result = true; //smsMessageLogDao.createMessageLog(request, traceId);
+        if (result) {
 
             final String message = request.getBody();
 
             //TODO: Need to invoke message body processing
 
 
-
-
             final SMSMessage successReply = new SMSMessageRequest();
-            successReply.setBody("We received your message and created a request on behalf of you. Please use #"+requestId+" for furthur communication, Thank you!");
+            MessageFormat mf = new MessageFormat(messageSource.getMessage("starapp.twillio.acknoledgement", null, locale));
+            successReply.setBody(mf.format(new Object[]{requestId}));
             return twilioSMSService.generateSMSReply(successReply, traceId);
 
 
-
-        }else{
+        } else {
             // Will not throw an error but generate an error message as response
             final SMSMessage errorReply = new SMSMessageRequest();
             errorReply.setBody(errorHandler.getErrorMessage(MessageConstants.CODE_SMS_ERROR_REPLY));
@@ -55,8 +58,6 @@ public class SMSMessageHandlerService extends BaseSMService {
         }
 
     }
-
-
 
 
 }
