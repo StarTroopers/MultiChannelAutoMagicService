@@ -9,6 +9,7 @@ import org.apache.commons.codec.binary.Base64;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
 import javax.crypto.Mac;
@@ -31,27 +32,27 @@ public class TrelloWebhookController extends BaseAppController {
      * Webhook API for Trello to use when Board is modified by User
      *
      * @param message
-     * @param traceId
      * @return
      */
-    @PostMapping(value = "/message",
-            produces = "application/xml")
-    public String handleWebhookResponse(@RequestBody TrelloResponse message,
+    @PostMapping(value = "/message")
+    @ResponseStatus(HttpStatus.OK)
+    public String handleWebhookResponse(@RequestBody(required=false) TrelloResponse message,
                                         @RequestHeader(name = AppHttpHeaders.TRELLO_WEBHOOK_HEADER, required = false)
                                                 String headerHash) {
-
-        LOGGER.debug("Message From Trello: " + message.toString());
-        LOGGER.debug("Result of Verification: " + verifyTrelloWebhookRequest(message, headerHash));
-        switch (message.getAction().getType()) {
-            case "commentCard":
-                LOGGER.debug("Comment Added to card: " + message.getAction().getData().getText());
-                break;
-            case "deleteCard":
-                LOGGER.debug("Card deleted: " + message.getAction().getData().getCard().getId());
-                break;
-            case "updateComment":
-                LOGGER.debug("Card moved: " + message.getAction().getData().getListAfter().getName());
-                break;
+        if(message.getAction() != null && !message.getAction().equals(null) ) {
+            LOGGER.debug("Message From Trello: " + message.toString());
+            LOGGER.debug("Result of Verification: " + verifyTrelloWebhookRequest(message, headerHash));
+            switch (message.getAction().getType()) {
+                case "commentCard":
+                    LOGGER.debug("Comment Added to card: " + message.getAction().getData().getText());
+                    break;
+                case "deleteCard":
+                    LOGGER.debug("Card deleted: " + message.getAction().getData().getCard().getId());
+                    break;
+                case "updateComment":
+                    LOGGER.debug("Card moved: " + message.getAction().getData().getListAfter().getName());
+                    break;
+            }
         }
         return "SUCEESS";
     }
