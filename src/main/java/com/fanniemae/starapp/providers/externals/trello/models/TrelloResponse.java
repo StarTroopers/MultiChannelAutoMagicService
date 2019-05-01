@@ -18,7 +18,7 @@ public class TrelloResponse {
 
 	@Override
 	public String toString() {
-		return "TrelloResponse [ActionObject=" + ActionObject.toString() + ", ModelObject=" + ModelObject.toString() + "]";
+		return "TrelloResponse [ActionObject=" + ActionObject + ", ModelObject=" + ModelObject + "]";
 	}
 
 	public void setAction(Action actionObject) {

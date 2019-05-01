@@ -87,14 +87,15 @@ public class SMSPhoneAlertController extends BaseAppController {
         smsMessageBeanRepository.save(smsMessage);
 
         LOGGER.info("{}", smsMessage);
-        MultiChannelAutoMessage multiChannelAutoMessage;
+        MultiChannelAutoMessage multiCnlMsg;
         String msgBody = smsMessage.getBody();
         if (msgBody.contains("#")) {
             int hashIndex = msgBody.indexOf("#");
             Long msgId = Long.parseLong(msgBody.substring(hashIndex + 1, msgBody.indexOf(" ", hashIndex)));
             Optional<MultiChannelAutoMessage> multiChannelAutoMessages = multiChannelAutoMessageRepository.findById(msgId);
-            multiChannelAutoMessage = multiChannelAutoMessages.get();
-            trelloApi.addCommentToCard(multiChannelAutoMessage.getCardId(), smsMessage.getBody().replace("#" + msgId, ""));
+            multiCnlMsg = multiChannelAutoMessages.get();
+            trelloApi.addCommentToCard(multiCnlMsg.getCardId(), smsMessage.getBody().replace("#" + msgId, ""));
+
 
         } else {
             Card card = new Card();
@@ -102,13 +103,14 @@ public class SMSPhoneAlertController extends BaseAppController {
             card.setDesc(smsMessage.getBody());
             card = trelloApi.createCard(idlist, card);
 
-            multiChannelAutoMessage = new MultiChannelAutoMessage();
-            multiChannelAutoMessage.setAccountsSid(smsMessage.getAccountSid());
-            multiChannelAutoMessage.setCardId(card.getId());
-
-            multiChannelAutoMessage = multiChannelAutoMessageRepository.save(multiChannelAutoMessage);
+            multiCnlMsg = new MultiChannelAutoMessage();
+            multiCnlMsg.setAccountsSid(smsMessage.getAccountSid());
+            multiCnlMsg.setCardId(card.getId());
+            multiCnlMsg.setChannelType("SMS");
+            multiCnlMsg.setContact(smsMessage.getFrom());
+            multiCnlMsg = multiChannelAutoMessageRepository.save(multiCnlMsg);
         }
-        final MessageResponse<String> response = smsMessageHandlerService.handleSmsMessage(smsMessage, multiChannelAutoMessage.getId(), traceId);
+        final MessageResponse<String> response = smsMessageHandlerService.handleSmsMessage(smsMessage, multiCnlMsg.getId(), traceId);
 
         if (response.isStatus()) {
             LOGGER.debug("Successful handling SMS Message from mobile! traceId is {}", traceId);
