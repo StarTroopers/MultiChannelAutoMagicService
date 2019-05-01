@@ -73,7 +73,7 @@ public class SMSPhoneAlertController extends BaseAppController {
         smsMessage.setSmsSid(message.get("SmsSid"));
         smsMessage.setSmsStatus(message.get("received"));
 
-        smsMessage.setFrom(message.get("From"));
+        smsMessage.setFrom(message.get("From")); // TODO: Muhit - Verify The number is present in DB
         smsMessage.setFromCity(message.get("FromCity"));
         smsMessage.setFromCountry(message.get("FromCountry"));
         smsMessage.setFromState(message.get("FromState"));

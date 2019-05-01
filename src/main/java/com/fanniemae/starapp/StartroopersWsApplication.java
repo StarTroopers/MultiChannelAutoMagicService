@@ -20,6 +20,8 @@ public class StartroopersWsApplication {
 	public static void main(String[] args) {
 		LOGGER.info("####### Starting Star Troopers Application #######");
 		SpringApplication.run(StartroopersWsApplication.class, args);
+
+		// TODO: On startup load the database with customer values
 	}
 
 	@Bean
