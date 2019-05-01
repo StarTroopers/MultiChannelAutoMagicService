@@ -34,12 +34,12 @@ public class TrelloWebhookController extends BaseAppController {
      * @param message
      * @return
      */
-    @PostMapping(value = "/message")
+    @RequestMapping(value= "/message", method = {RequestMethod.HEAD,RequestMethod.POST})
     @ResponseStatus(HttpStatus.OK)
     public String handleWebhookResponse(@RequestBody(required=false) TrelloResponse message,
                                         @RequestHeader(name = AppHttpHeaders.TRELLO_WEBHOOK_HEADER, required = false)
                                                 String headerHash) {
-        if(message.getAction() != null && !message.getAction().equals(null) ) {
+        if(message != null && message.getAction() != null && !message.getAction().equals(null) ) {
             LOGGER.debug("Message From Trello: " + message.toString());
             LOGGER.debug("Result of Verification: " + verifyTrelloWebhookRequest(message, headerHash));
             switch (message.getAction().getType()) {
