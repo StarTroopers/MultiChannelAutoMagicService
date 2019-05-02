@@ -8,6 +8,7 @@ import com.fanniemae.starapp.providers.externals.twilio.models.MessageResponse;
 import com.fanniemae.starapp.providers.externals.twilio.models.SMSMessage;
 import com.fanniemae.starapp.providers.externals.twilio.models.SMSMessageRequest;
 import com.fanniemae.starapp.repositories.MultiChannelAutoMessageRepository;
+import com.fanniemae.starapp.services.TrelloWebhookService;
 import com.fanniemae.starapp.services.messaging.sms.TwilioSMSService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -41,14 +42,7 @@ public class TrelloWebhookController extends BaseAppController {
     String webhookURL;
 
     @Autowired
-    MultiChannelAutoMessageRepository multiChannelAutoMessageRepository;
-
-    @Autowired
-    MessageSource messageSource;
-
-    @Autowired
-    private TwilioSMSService twilioSMSService;
-
+    private TrelloWebhookService trelloWebhookService;
     /**
      * Webhook API for Trello to use when Board is modified by User
      *
@@ -62,47 +56,9 @@ public class TrelloWebhookController extends BaseAppController {
                                                 String headerHash) {
         LOGGER.debug("request received");
         if(message != null && message.getAction() != null && !message.getAction().equals(null) ) {
-            final SMSMessage responseMessage = new SMSMessageRequest();
-
-            //TODO: Grab from property on the Twilio Number
-            responseMessage.setFrom("+16505252660");
-
             LOGGER.debug("Message From Trello: " + message.toString());
             LOGGER.debug("Result of Verification: " + verifyTrelloWebhookRequest(message, headerHash));
-            List<MultiChannelAutoMessage> multiChnlMsgs;
-            MessageFormat mf;
-            switch (message.getAction().getType()) {
-                case "commentCard":
-                    LOGGER.debug("Comment Added to card: " + message.getAction().getData().getText());
-                    multiChnlMsgs = multiChannelAutoMessageRepository.findByCardId(message.getAction().getData().getCard().getId());
-                    responseMessage.setTo(multiChnlMsgs.get(0).getContact());
-                    mf = new MessageFormat(messageSource.getMessage("starapp.twillio.commentCard", null, Locale.US));
-                    responseMessage.setBody(mf.format(new Object[]{message.getAction().getData().getText()}));
-                    twilioSMSService.notifyUser(responseMessage, null);
-                    break;
-                case "deleteCard":
-                    LOGGER.debug("Card deleted: " + message.getAction().getData().getCard().getId());
-                    multiChnlMsgs = multiChannelAutoMessageRepository.findByCardId(message.getAction().getData().getCard().getId());
-                    responseMessage.setTo(multiChnlMsgs.get(0).getContact());
-                    responseMessage.setBody(messageSource.getMessage("starapp.twillio.commentCard", null, Locale.US));
-                    twilioSMSService.notifyUser(responseMessage, null);
-                    break;
-                case "updateComment":
-                    LOGGER.debug("Card moved: " + message.getAction().getData().getAction().getText());
-                    multiChnlMsgs = multiChannelAutoMessageRepository.findByCardId(message.getAction().getData().getCard().getId());
-                    responseMessage.setTo(multiChnlMsgs.get(0).getContact());
-                    mf = new MessageFormat(messageSource.getMessage("starapp.twillio.updateComment", null, Locale.US));
-                    responseMessage.setBody(mf.format(new Object[]{message.getAction().getData().getAction().getText()}));
-                    twilioSMSService.notifyUser(responseMessage, null);
-                    break;
-                case "updateCard":
-                    LOGGER.debug("Card moved: " + message.getAction().getData().getListAfter().getName());
-                    multiChnlMsgs = multiChannelAutoMessageRepository.findByCardId(message.getAction().getData().getCard().getId());
-                    responseMessage.setTo(multiChnlMsgs.get(0).getContact());
-                    mf = new MessageFormat(messageSource.getMessage("starapp.twillio.updateCard", null, Locale.US));
-                    responseMessage.setBody(mf.format(new Object[]{message.getAction().getData().getListAfter().getName(),message.getAction().getData().getListBefore().getName()}));
-                    twilioSMSService.notifyUser(responseMessage, null);
-                    break;            }
+            trelloWebhookService.handleWebhookMessage(message);
         }
         return "SUCEESS";
     }
