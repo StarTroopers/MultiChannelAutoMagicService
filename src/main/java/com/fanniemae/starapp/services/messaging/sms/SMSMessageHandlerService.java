@@ -20,8 +20,10 @@ import java.util.Locale;
 public class SMSMessageHandlerService extends BaseSMService {
 
     private static final Logger LOGGER = LogManager.getLogger(SMSMessageHandlerService.class);
+    
     @Autowired
     MessageSource messageSource;
+
     @Autowired
     private TwilioSMSService twilioSMSService;
 
@@ -35,8 +37,13 @@ public class SMSMessageHandlerService extends BaseSMService {
         LOGGER.info("Creating an SMS Message log. traceId of {}", traceId);
 
 
+
+
         //TODO: NEED TO STORE THE REQUEST IN DB. INVOKE DAO HERE
         final boolean result = true; //smsMessageLogDao.createMessageLog(request, traceId);
+
+
+
         if (result) {
 
             final String message = request.getBody();

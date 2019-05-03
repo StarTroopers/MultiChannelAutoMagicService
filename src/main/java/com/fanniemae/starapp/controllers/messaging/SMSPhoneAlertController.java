@@ -11,6 +11,7 @@ import com.fanniemae.starapp.providers.externals.twilio.models.SMSMessage;
 import com.fanniemae.starapp.providers.externals.twilio.models.SMSMessageRequest;
 import com.fanniemae.starapp.repositories.MultiChannelAutoMessageRepository;
 import com.fanniemae.starapp.repositories.SMSMessageBeanRepository;
+import com.fanniemae.starapp.services.messaging.sms.MessageChannelType;
 import com.fanniemae.starapp.services.messaging.sms.SMSMessageHandlerService;
 import com.fanniemae.starapp.services.messaging.sms.TwilioSMSService;
 import com.fanniemae.starapp.swagger.SMSFeatureDoc;
@@ -31,22 +32,28 @@ import java.util.Optional;
 public class SMSPhoneAlertController extends BaseAppController {
 
     private static final Logger LOGGER = LogManager.getLogger(SMSPhoneAlertController.class);
+    private static final String WHATSAPP_PREFIX = "whatsapp:";
 
     @Value("${starapp.trello.idlist}")
     String idlist;
+
     @Autowired
     SMSMessageBeanRepository smsMessageBeanRepository;
+
     @Autowired
     Trello trelloApi;
+
     @Autowired
     MultiChannelAutoMessageRepository multiChannelAutoMessageRepository;
+
     @Autowired
     private TwilioSMSService twilioSMSService;
+
     @Autowired
     private SMSMessageHandlerService smsMessageHandlerService;
 
     /**
-     * Webhook API for Twilio to use when message is capture by the Twilio Number
+     * Webhook API for Twilio to use when message is capture by the Twilio Number or through Whatsapp number
      *
      * @param message
      * @param traceId
@@ -62,28 +69,36 @@ public class SMSPhoneAlertController extends BaseAppController {
         LOGGER.debug("Handling SMS Message from mobile!");
 
         final SMSMessageRequest smsMessage = new SMSMessageRequest();
+        LOGGER.info( "Raw message is {}", message);
 
+        //Whatsapp and SMS provided data:
+        smsMessage.setSmsMessageSid(message.get("SmsMessageSid"));
+        smsMessage.setNumMedia(Integer.parseInt(message.get("NumMedia")));
+        smsMessage.setSmsSid(message.get("SmsSid"));
+        smsMessage.setBody(message.get("Body"));
+        smsMessage.setNumSegments(Integer.parseInt(message.get("NumSegments")));
+        smsMessage.setMessageSid(message.get("MessageSid"));
         smsMessage.setAccountSid(message.get("AccountSid"));
         smsMessage.setApiVersion(message.get("ApiVersion"));
-        smsMessage.setBody(message.get("Body"));
-        smsMessage.setMessageSid(message.get("MessageSid"));
-        smsMessage.setNumMedia(Integer.parseInt(message.get("NumMedia")));
-        smsMessage.setNumSegments(Integer.parseInt(message.get("NumSegments")));
-        smsMessage.setSmsMessageSid(message.get("SmsMessageSid"));
-        smsMessage.setSmsSid(message.get("SmsSid"));
-        smsMessage.setSmsStatus(message.get("received"));
+        smsMessage.setFrom(extractNumber(message.get("From")));
+        smsMessage.setTo(extractNumber(message.get("To")));
 
-        smsMessage.setFrom(message.get("From")); // TODO: Muhit - Verify The number is present in DB
+
+        //Only SMS provided
+        smsMessage.setSmsStatus(message.get("received"));
         smsMessage.setFromCity(message.get("FromCity"));
         smsMessage.setFromCountry(message.get("FromCountry"));
         smsMessage.setFromState(message.get("FromState"));
         smsMessage.setFromZip(message.get("FromZip"));
-
-        smsMessage.setTo(message.get("To"));
         smsMessage.setToCity(message.get("ToCity"));
         smsMessage.setToCountry(message.get("ToCountry"));
         smsMessage.setToState(message.get("ToState"));
         smsMessage.setToZip(message.get("ToZip"));
+
+        smsMessage.setChannel( (isWhatsAppNumber(message.get("From")) &&  isWhatsAppNumber(message.get("To")))
+                ? MessageChannelType.WHATSAPP.getTypeValue() : MessageChannelType.SMS.getTypeValue() );
+
+
         smsMessageBeanRepository.save(smsMessage);
 
         LOGGER.info("{}", smsMessage);
@@ -98,6 +113,7 @@ public class SMSPhoneAlertController extends BaseAppController {
 
 
         } else {
+
             Card card = new Card();
             card.setName(smsMessage.getBody());
             card.setDesc(smsMessage.getBody());
@@ -118,6 +134,18 @@ public class SMSPhoneAlertController extends BaseAppController {
         }
         return null;
 
+    }
+
+
+    private boolean isWhatsAppNumber(String sourceNumber){
+        return sourceNumber.startsWith(WHATSAPP_PREFIX);
+    }
+
+    private String extractNumber(String phoneNumber){
+        if(isWhatsAppNumber(phoneNumber)){
+            return phoneNumber.substring(WHATSAPP_PREFIX.length());
+        }
+        return phoneNumber;
     }
 
 

@@ -20,6 +20,7 @@ public class SMSMessageRequest extends SMSMessage{
     private String smsMessageSid;
     private String smsSid;
     private String smsStatus;
+    private String channel;
 
     private String toCity;
     private String toCountry;
@@ -156,6 +157,14 @@ public class SMSMessageRequest extends SMSMessage{
         this.toZip = toZip;
     }
 
+    public String getChannel() {
+        return channel;
+    }
+
+    public void setChannel(String channel) {
+        this.channel = channel;
+    }
+
     @Override
     public String toString() {
         final StringBuilder sb = new StringBuilder("SMSMessageRequest{");
@@ -171,6 +180,7 @@ public class SMSMessageRequest extends SMSMessage{
         sb.append(", smsMessageSid='").append(smsMessageSid).append('\'');
         sb.append(", smsSid='").append(smsSid).append('\'');
         sb.append(", smsStatus='").append(smsStatus).append('\'');
+        sb.append(", channel='").append(channel).append('\'');
         sb.append(", toCity='").append(toCity).append('\'');
         sb.append(", toCountry='").append(toCountry).append('\'');
         sb.append(", toState='").append(toState).append('\'');
