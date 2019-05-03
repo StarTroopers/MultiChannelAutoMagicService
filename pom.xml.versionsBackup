@@ -12,7 +12,7 @@
 
 	<groupId>com.fanniemae.starapp</groupId>
 	<artifactId>startroopers-ws</artifactId>
-	<version>1.0.0-SNAPSHOT</version>
+	<version>0.0.1-SNAPSHOT</version>
 	<name>startroopers-ws</name>
 	<description>Demo project for Spring Boot</description>
 
