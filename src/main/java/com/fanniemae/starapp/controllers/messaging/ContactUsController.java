@@ -1,8 +1,10 @@
 package com.fanniemae.starapp.controllers.messaging;
 
 import com.fanniemae.starapp.controllers.request.ContactUsBean;
+import com.fanniemae.starapp.services.email.EmailSender;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -19,6 +21,9 @@ public class ContactUsController {
 
     private static final Logger LOGGER = LogManager.getLogger(ContactUsController.class);
 
+    @Autowired
+    private EmailSender emailSender;
+
     /**
      * This API will capture user information and create a response back to the user's provided email
      *
@@ -32,6 +37,7 @@ public class ContactUsController {
         // 1. Create a Trello Card
         // 2. Respond back to the requester's email using SendGrid implementation.
         // 3. Store the user information as email channel for future communication such as when a trello card gets updated.
+        emailSender.send(message);
 
         return new ResponseEntity(HttpStatus.OK);
     }
