@@ -47,7 +47,7 @@ public class EmailSenderImpl implements EmailSender {
 
     private Mail getMail(ContactUsBean contactUsBean) {
         Email from = new Email(mailFrom);
-        String subject = "Hello " + contactUsBean.getFirstName() + " " + contactUsBean.getLastName();
+        String subject = contactUsBean.getSubject();
         Email to = new Email(contactUsBean.getEmail());
         Content content = new Content("text/plain", contactUsBean.getMessage());
 
