@@ -52,7 +52,7 @@ public class SMSMessageHandlerService extends BaseSMService {
 
 
             final SMSMessage successReply = new SMSMessageRequest();
-            MessageFormat mf = new MessageFormat(messageSource.getMessage("starapp.twillio.acknoledgement", null, Locale.US));
+            MessageFormat mf = new MessageFormat(messageSource.getMessage((message.contains("#"))?"starapp.twillio.acknoledgeupdate":"starapp.twillio.acknoledgement", null, Locale.US));
             successReply.setBody(mf.format(new Object[]{requestId}));
             return twilioSMSService.generateSMSReply(successReply, traceId);
 

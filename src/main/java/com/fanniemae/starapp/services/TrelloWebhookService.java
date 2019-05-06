@@ -1,10 +1,12 @@
 package com.fanniemae.starapp.services;
 
+import com.fanniemae.starapp.controllers.request.ContactUsBean;
 import com.fanniemae.starapp.domains.MultiChannelAutoMessage;
 import com.fanniemae.starapp.providers.externals.trello.models.TrelloResponse;
 import com.fanniemae.starapp.providers.externals.twilio.models.SMSMessage;
 import com.fanniemae.starapp.providers.externals.twilio.models.SMSMessageRequest;
 import com.fanniemae.starapp.repositories.MultiChannelAutoMessageRepository;
+import com.fanniemae.starapp.services.email.EmailSender;
 import com.fanniemae.starapp.services.messaging.sms.TwilioSMSService;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -27,6 +29,9 @@ public class TrelloWebhookService {
     MessageSource messageSource;
     @Autowired
     TwilioSMSService twilioSMSService;
+
+    @Autowired
+    private EmailSender emailSender;
 
     public void handleWebhookMessage(TrelloResponse message) {
 
@@ -90,6 +95,8 @@ public class TrelloWebhookService {
         LOGGER.debug(responseMessage.getBody());
         if ("SMS".equals(multiChnlMsg.getChannelType()))
             twilioSMSService.notifyUser(responseMessage, null);
+        else if ("EMAIL".equals(multiChnlMsg.getChannelType()))
+            emailSender.send(new ContactUsBean(multiChnlMsg.getFirstName(),multiChnlMsg.getLastName(),multiChnlMsg.getContact(),responseMessage.getBody()));
     }
 
     private MultiChannelAutoMessage getMessageByCardId(String cardId) {

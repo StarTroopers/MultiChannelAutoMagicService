@@ -14,6 +14,8 @@ public class MultiChannelAutoMessage {
     private String cardId;
     private String channelType;
     private String contact;
+    private String lastName;
+    private String firstName;
 
     public Long getId() {
         return id;
@@ -61,6 +63,22 @@ public class MultiChannelAutoMessage {
         this.contact = contact;
     }
 
+    public String getLastName() {
+        return lastName;
+    }
+
+    public String getFirstName() {
+        return firstName;
+    }
+
+    public void setLastName(String lastName) {
+        this.contact = lastName;
+    }
+
+    public void setFirstName(String firstName) {
+        this.contact = firstName;
+    }
+
     @Override
     public String toString() {
         return "MultiChannelAutoMessage{" +
@@ -69,6 +87,8 @@ public class MultiChannelAutoMessage {
                 ", cardId='" + cardId + '\'' +
                 ", channelType='" + channelType + '\'' +
                 ", contact='" + contact + '\'' +
+                ", lastName='" + lastName + '\'' +
+                ", firstName='" + firstName + '\'' +
                 ", accountsSid='" + accountsSid + '\'' +
                 '}';
     }
