@@ -96,7 +96,7 @@ public class TrelloWebhookService {
         if ("SMS".equals(multiChnlMsg.getChannelType()))
             twilioSMSService.notifyUser(responseMessage, null);
         else if ("EMAIL".equals(multiChnlMsg.getChannelType()))
-            emailSender.send(new ContactUsBean(multiChnlMsg.getFirstName(),multiChnlMsg.getLastName(),multiChnlMsg.getContact(),responseMessage.getBody()));
+            emailSender.send(new ContactUsBean(multiChnlMsg.getFirstName(),multiChnlMsg.getLastName(),multiChnlMsg.getContact(),responseMessage.getBody(),""));
     }
 
     private MultiChannelAutoMessage getMessageByCardId(String cardId) {
