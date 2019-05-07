@@ -1,10 +1,12 @@
 package com.fanniemae.starapp.services;
 
 import com.fanniemae.starapp.controllers.request.ContactUsBean;
+import com.fanniemae.starapp.domains.Customer;
 import com.fanniemae.starapp.domains.MultiChannelAutoMessage;
 import com.fanniemae.starapp.providers.externals.trello.models.TrelloResponse;
 import com.fanniemae.starapp.providers.externals.twilio.models.SMSMessage;
 import com.fanniemae.starapp.providers.externals.twilio.models.SMSMessageRequest;
+import com.fanniemae.starapp.repositories.CustomerRepository;
 import com.fanniemae.starapp.repositories.MultiChannelAutoMessageRepository;
 import com.fanniemae.starapp.services.email.EmailSender;
 import com.fanniemae.starapp.services.messaging.sms.TwilioSMSService;
@@ -29,7 +31,8 @@ public class TrelloWebhookService {
     MessageSource messageSource;
     @Autowired
     TwilioSMSService twilioSMSService;
-
+    @Autowired
+    CustomerRepository customerRepository;
     @Autowired
     private EmailSender emailSender;
 
@@ -93,10 +96,15 @@ public class TrelloWebhookService {
 
     private void messageResponseHandler(SMSMessage responseMessage, MultiChannelAutoMessage multiChnlMsg) {
         LOGGER.debug(responseMessage.getBody());
-        if ("SMS".equals(multiChnlMsg.getChannelType()))
+        if ("SMS".equals(multiChnlMsg.getChannelType())) {
+            List<Customer> customer = customerRepository.findByPhone(multiChnlMsg.getContact());
+            responseMessage.setBody("@Fannie Mae at your service \\n Dear "+ customer.get(0).getFirstName() + " " + responseMessage.getBody());
             twilioSMSService.notifyUser(responseMessage, null);
-        else if ("EMAIL".equals(multiChnlMsg.getChannelType()))
-            emailSender.send(new ContactUsBean(multiChnlMsg.getFirstName(),multiChnlMsg.getLastName(),multiChnlMsg.getContact(),responseMessage.getBody(),""));
+        } else if ("EMAIL".equals(multiChnlMsg.getChannelType())) {
+            List<Customer> customer = customerRepository.findByEmail(multiChnlMsg.getContact());
+            responseMessage.setBody("@Fannie Mae at your service \\n Dear "+ customer.get(0).getFirstName() + " " + responseMessage.getBody());
+            emailSender.send(new ContactUsBean(multiChnlMsg.getFirstName(), multiChnlMsg.getLastName(), multiChnlMsg.getContact(), responseMessage.getBody(), ""));
+        }
     }
 
     private MultiChannelAutoMessage getMessageByCardId(String cardId) {
