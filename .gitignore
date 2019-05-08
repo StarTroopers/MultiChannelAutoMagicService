@@ -32,3 +32,4 @@ keys
 src/main/resources/application.properties
 log/
 .ideaDataSources/
+muhit-mac.pem

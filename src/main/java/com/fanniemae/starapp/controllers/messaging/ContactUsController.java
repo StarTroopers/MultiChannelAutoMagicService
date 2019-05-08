@@ -1,7 +1,9 @@
 package com.fanniemae.starapp.controllers.messaging;
 
 import com.fanniemae.starapp.controllers.request.ContactUsBean;
+import com.fanniemae.starapp.domains.Customer;
 import com.fanniemae.starapp.domains.MultiChannelAutoMessage;
+import com.fanniemae.starapp.repositories.CustomerRepository;
 import com.fanniemae.starapp.repositories.MultiChannelAutoMessageRepository;
 import com.fanniemae.starapp.services.email.EmailSender;
 import com.fanniemae.starapp.services.messaging.sms.MessageChannelType;
@@ -14,12 +16,15 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.MessageSource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.util.ResourceUtils;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.io.File;
 import java.text.MessageFormat;
+import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
 
@@ -47,6 +52,9 @@ public class ContactUsController {
     @Autowired
     private EmailSender emailSender;
 
+    @Autowired
+    private CustomerRepository customerRepository;
+
     /**
      * This API will capture user information and create a response back to the user's provided email
      *
@@ -73,9 +81,10 @@ public class ContactUsController {
             MessageFormat mf = new MessageFormat(messageSource.getMessage("starapp.twillio.acknoledgeupdate", null, Locale.US));
             message.setMessage(mf.format(new Object[]{multiCnlMsg.getId()}));
         } else {
+            List<Customer> customers = customerRepository.findByEmail(message.getEmail());
             Card card = new Card();
             card.setName(message.getSubject());
-            card.setDesc(message.getMessage());
+            card.setDesc("Organization: " + customers.get(0).getOrg() +" Name: "+  customers.get(0).getLastName()+ "," +customers.get(0).getFirstName()+ " Contact:" +message.getEmail()+ "\n\n" +message.getMessage());
             card = trelloApi.createCard(idlist, card);
 
             multiCnlMsg = new MultiChannelAutoMessage();
@@ -87,6 +96,13 @@ public class ContactUsController {
             multiCnlMsg = multiChannelAutoMessageRepository.save(multiCnlMsg);
             MessageFormat mf = new MessageFormat(messageSource.getMessage("starapp.twillio.acknoledgement", null, Locale.US));
             message.setMessage(mf.format(new Object[]{multiCnlMsg.getId()}));
+            try {
+                File file  = ResourceUtils.getFile("classpath:images/EMAIL_icon.png");
+                LOGGER.debug("Attachment Name: "+ file.getAbsolutePath() + file.length());
+                trelloApi.addAttachmentToCard(card.getId(), file);
+            } catch(Exception e){
+                e.printStackTrace();
+            }
         }
         emailSender.send(message);
 

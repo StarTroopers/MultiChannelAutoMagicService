@@ -5,10 +5,12 @@ import com.fanniemae.starapp.commons.AppHttpHeaders;
 import com.fanniemae.starapp.commons.MessageConstants;
 import com.fanniemae.starapp.controllers.BaseAppController;
 import com.fanniemae.starapp.controllers.request.SMSMessageBean;
+import com.fanniemae.starapp.domains.Customer;
 import com.fanniemae.starapp.domains.MultiChannelAutoMessage;
 import com.fanniemae.starapp.providers.externals.twilio.models.MessageResponse;
 import com.fanniemae.starapp.providers.externals.twilio.models.SMSMessage;
 import com.fanniemae.starapp.providers.externals.twilio.models.SMSMessageRequest;
+import com.fanniemae.starapp.repositories.CustomerRepository;
 import com.fanniemae.starapp.repositories.MultiChannelAutoMessageRepository;
 import com.fanniemae.starapp.repositories.SMSMessageBeanRepository;
 import com.fanniemae.starapp.services.messaging.sms.MessageChannelType;
@@ -21,8 +23,12 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.util.ResourceUtils;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
@@ -51,6 +57,9 @@ public class SMSPhoneAlertController extends BaseAppController {
 
     @Autowired
     private SMSMessageHandlerService smsMessageHandlerService;
+
+    @Autowired
+    private CustomerRepository customerRepository;
 
     /**
      * Webhook API for Twilio to use when message is capture by the Twilio Number or through Whatsapp number
@@ -104,6 +113,7 @@ public class SMSPhoneAlertController extends BaseAppController {
         LOGGER.info("{}", smsMessage);
         MultiChannelAutoMessage multiCnlMsg;
         String msgBody = smsMessage.getBody();
+
         if (msgBody.contains("#")) {
             int hashIndex = msgBody.indexOf("#");
             Long msgId = Long.parseLong(msgBody.substring(hashIndex + 1, msgBody.indexOf(" ", hashIndex)));
@@ -111,12 +121,11 @@ public class SMSPhoneAlertController extends BaseAppController {
             multiCnlMsg = multiChannelAutoMessages.get();
             trelloApi.addCommentToCard(multiCnlMsg.getCardId(), smsMessage.getBody().replace("#" + msgId, ""));
 
-
         } else {
-
+            List<Customer> customers = customerRepository.findByPhone(smsMessage.getFrom());
             Card card = new Card();
             card.setName(smsMessage.getBody());
-            card.setDesc(smsMessage.getBody());
+            card.setDesc("Organization: " + customers.get(0).getOrg() +" Name: "+  customers.get(0).getLastName()+ "," +customers.get(0).getFirstName()+ " Contact:" +smsMessage.getFrom()+ "\n\n" +  smsMessage.getBody());
             card = trelloApi.createCard(idlist, card);
 
             multiCnlMsg = new MultiChannelAutoMessage();
@@ -126,6 +135,13 @@ public class SMSPhoneAlertController extends BaseAppController {
                     ? MessageChannelType.WHATSAPP.getTypeValue() : MessageChannelType.SMS.getTypeValue() );
             multiCnlMsg.setContact(smsMessage.getFrom());
             multiCnlMsg = multiChannelAutoMessageRepository.save(multiCnlMsg);
+            try {
+                File file  = ResourceUtils.getFile("classpath:images/"+multiCnlMsg.getChannelType()+"_icon.png");
+                LOGGER.debug("Attachment Name: "+ file.getAbsolutePath() + file.length());
+                trelloApi.addAttachmentToCard(card.getId(), file);
+            } catch(Exception e){
+                e.printStackTrace();
+            }
         }
         final MessageResponse<String> response = smsMessageHandlerService.handleSmsMessage(smsMessage, multiCnlMsg.getId(), traceId);
 

@@ -32,14 +32,14 @@ public class MultiChannelMessageService {
      * Create a Trello Card with the tweet
      * @param msg
      */
-    public void createChannelMessage(final MultiChannelAutoMessage msg, String message){
+    public MultiChannelAutoMessage createChannelMessage(final MultiChannelAutoMessage msg, String message){
         LOGGER.debug("Creating a trello card from a tweet of {}", msg.getScreenName());
 
         Card card = new Card();
         card.setName("Tweet from @" + msg.getScreenName());
         card.setDesc(message);
         card = trelloApi.createCard(idlist, card);
-        multiChannelAutoMessageRepository.save(msg);
+        return multiChannelAutoMessageRepository.save(msg);
 
     }
 
