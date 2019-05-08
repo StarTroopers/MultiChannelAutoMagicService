@@ -4,6 +4,7 @@ public enum MessageChannelType {
 
     WHATSAPP("WHATSAPP"),
     VOICE("VOICE"),
+    EMAIL("EMAIL"),
     SMS("SMS");
 
     private String type;
@@ -22,6 +23,8 @@ public enum MessageChannelType {
             return WHATSAPP;
         }else if(VOICE.type.equalsIgnoreCase(type)){
             return VOICE;
+        }else if(EMAIL.type.equalsIgnoreCase(type)){
+            return EMAIL;
         }else{
             return SMS;
         }

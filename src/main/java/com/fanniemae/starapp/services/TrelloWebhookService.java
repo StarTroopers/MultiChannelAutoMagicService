@@ -9,6 +9,7 @@ import com.fanniemae.starapp.providers.externals.twilio.models.SMSMessageRequest
 import com.fanniemae.starapp.repositories.CustomerRepository;
 import com.fanniemae.starapp.repositories.MultiChannelAutoMessageRepository;
 import com.fanniemae.starapp.services.email.EmailSender;
+import com.fanniemae.starapp.services.messaging.sms.MessageChannelType;
 import com.fanniemae.starapp.services.messaging.sms.TwilioSMSService;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -96,11 +97,18 @@ public class TrelloWebhookService {
 
     private void messageResponseHandler(SMSMessage responseMessage, MultiChannelAutoMessage multiChnlMsg) {
         LOGGER.debug(responseMessage.getBody());
-        if ("SMS".equals(multiChnlMsg.getChannelType())) {
+
+        final MessageChannelType type = MessageChannelType.convertType(multiChnlMsg.getChannelType());
+
+        if (MessageChannelType.SMS.equals(type)) {
             List<Customer> customer = customerRepository.findByPhone(multiChnlMsg.getContact());
             responseMessage.setBody("@Fannie Mae at your service \\n Dear "+ customer.get(0).getFirstName() + " " + responseMessage.getBody());
             twilioSMSService.notifyUser(responseMessage, null);
-        } else if ("EMAIL".equals(multiChnlMsg.getChannelType())) {
+        }else if (MessageChannelType.WHATSAPP.equals(type)) {
+            List<Customer> customer = customerRepository.findByPhone(multiChnlMsg.getContact());
+            responseMessage.setBody("@Fannie Mae at your service \\n Dear " + customer.get(0).getFirstName() + " " + responseMessage.getBody());
+            twilioSMSService.notifyWhatsappuser(responseMessage, null);
+        }else if (MessageChannelType.EMAIL.equals(type)) {
             List<Customer> customer = customerRepository.findByEmail(multiChnlMsg.getContact());
             responseMessage.setBody("@Fannie Mae at your service \\n Dear "+ customer.get(0).getFirstName() + " " + responseMessage.getBody());
             emailSender.send(new ContactUsBean(multiChnlMsg.getFirstName(), multiChnlMsg.getLastName(), multiChnlMsg.getContact(), responseMessage.getBody(), ""));

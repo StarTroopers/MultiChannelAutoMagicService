@@ -4,6 +4,7 @@ import com.fanniemae.starapp.controllers.request.ContactUsBean;
 import com.fanniemae.starapp.domains.MultiChannelAutoMessage;
 import com.fanniemae.starapp.repositories.MultiChannelAutoMessageRepository;
 import com.fanniemae.starapp.services.email.EmailSender;
+import com.fanniemae.starapp.services.messaging.sms.MessageChannelType;
 import com.julienvey.trello.Trello;
 import com.julienvey.trello.domain.Card;
 import org.apache.logging.log4j.LogManager;
@@ -79,7 +80,7 @@ public class ContactUsController {
 
             multiCnlMsg = new MultiChannelAutoMessage();
             multiCnlMsg.setCardId(card.getId());
-            multiCnlMsg.setChannelType("EMAIL");
+            multiCnlMsg.setChannelType(MessageChannelType.EMAIL.getTypeValue());
             multiCnlMsg.setContact(message.getEmail());
             multiCnlMsg.setLastName(message.getLastName());
             multiCnlMsg.setFirstName(message.getFirstName());

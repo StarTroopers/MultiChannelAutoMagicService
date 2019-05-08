@@ -122,7 +122,8 @@ public class SMSPhoneAlertController extends BaseAppController {
             multiCnlMsg = new MultiChannelAutoMessage();
             multiCnlMsg.setAccountsSid(smsMessage.getAccountSid());
             multiCnlMsg.setCardId(card.getId());
-            multiCnlMsg.setChannelType("SMS");
+            multiCnlMsg.setChannelType( (isWhatsAppNumber(message.get("From")) &&  isWhatsAppNumber(message.get("To")))
+                    ? MessageChannelType.WHATSAPP.getTypeValue() : MessageChannelType.SMS.getTypeValue() );
             multiCnlMsg.setContact(smsMessage.getFrom());
             multiCnlMsg = multiChannelAutoMessageRepository.save(multiCnlMsg);
         }
