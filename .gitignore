@@ -31,3 +31,4 @@ keys
 
 src/main/resources/application.properties
 log/
+.ideaDataSources/
