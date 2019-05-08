@@ -13,6 +13,8 @@ public class Customer {
     private String lastName;
     private String email;
     private String phone;
+    private String screenName;
+    private String org;
 
     public Long getId() {
         return id;
@@ -52,5 +54,21 @@ public class Customer {
 
     public void setPhone(String phone) {
         this.phone = phone;
+    }
+
+    public String getOrg() {
+        return org;
+    }
+
+    public void setOrg(String org) {
+        this.org = org;
+    }
+
+    public String getScreenName() {
+        return screenName;
+    }
+
+    public void setScreenName(String screenName) {
+        this.screenName = screenName;
     }
 }
