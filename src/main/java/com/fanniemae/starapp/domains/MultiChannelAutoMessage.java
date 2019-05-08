@@ -13,6 +13,7 @@ public class MultiChannelAutoMessage {
     private String customerId;
     private String cardId;
     private String channelType;
+    private String screenName;
     private String contact;
     private String lastName;
     private String firstName;
@@ -79,18 +80,32 @@ public class MultiChannelAutoMessage {
         this.contact = firstName;
     }
 
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public String getScreenName() {
+        return screenName;
+    }
+
+    public void setScreenName(String screenName) {
+        this.screenName = screenName;
+    }
+
     @Override
     public String toString() {
-        return "MultiChannelAutoMessage{" +
-                "id=" + id +
-                ", customerId='" + customerId + '\'' +
-                ", cardId='" + cardId + '\'' +
-                ", channelType='" + channelType + '\'' +
-                ", contact='" + contact + '\'' +
-                ", lastName='" + lastName + '\'' +
-                ", firstName='" + firstName + '\'' +
-                ", accountsSid='" + accountsSid + '\'' +
-                '}';
+        final StringBuilder sb = new StringBuilder("MultiChannelAutoMessage{");
+        sb.append("id=").append(id);
+        sb.append(", customerId='").append(customerId).append('\'');
+        sb.append(", cardId='").append(cardId).append('\'');
+        sb.append(", channelType='").append(channelType).append('\'');
+        sb.append(", screenName='").append(screenName).append('\'');
+        sb.append(", contact='").append(contact).append('\'');
+        sb.append(", lastName='").append(lastName).append('\'');
+        sb.append(", firstName='").append(firstName).append('\'');
+        sb.append(", accountsSid='").append(accountsSid).append('\'');
+        sb.append('}');
+        return sb.toString();
     }
 }
 
