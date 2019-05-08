@@ -71,7 +71,7 @@ public class SMSPhoneAlertController extends BaseAppController {
     @PostMapping(value = "/message",
             produces = "application/xml")
     @SMSFeatureDoc(value = "Captures message from SMS")
-    public String handleSmsNotification(@RequestBody Map<String, String> message,
+    public String handleSmsNotification(@RequestParam Map<String, String> message,
                                         @RequestHeader(name = AppHttpHeaders.TRACEID_HEADER, required = false)
                                                 String traceId) {
 
