@@ -1,3 +1,5 @@
+ALTER USER sa SET PASSWORD 'star';
+
 INSERT INTO customer(id, first_name, last_name, email, phone) VALUES (1, 'Muhit', 'Mustakim', 'shomik70@gmail.com', '+19729221474');
 INSERT INTO customer(id, first_name, last_name, email, phone) VALUES (2, 'Avinash', 'Misra', 'avinashmisra@yahoo.com', '+12404229247');
 INSERT INTO customer(id, first_name, last_name, email, phone) VALUES (3, 'Subba', 'Potlu', 'mail.subbarao@gmail.com', '+12244192770');
