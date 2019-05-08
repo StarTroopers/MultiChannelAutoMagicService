@@ -180,5 +180,33 @@ public class SMSPhoneAlertController extends BaseAppController {
 
     }
 
+    @PostMapping(value = "/notify-whatsapp")
+    public void sendWhatsappAlertMessage(@RequestBody SMSMessageBean messageRqst,
+                                         @RequestHeader(name = AppHttpHeaders.TRACEID_HEADER, required = false) String traceId){
+
+        LOGGER.debug("Sending a whatsapp message! traceId of {}", traceId);
+
+        if(messageRqst == null || messageRqst.getMessage() == null || messageRqst.getToPhoneNumber() == null){
+            errorHandler.throwAppException(MessageConstants.CODE_INCOMPLETE_REQUEST_ERROR, AppErrorType.REQUEST_ERROR, null);
+        }
+
+        final SMSMessage message = new SMSMessageRequest();
+        message.setTo(messageRqst.getToPhoneNumber());
+        message.setBody(messageRqst.getMessage());
+
+        //TODO: Grab from property on the Twilio Number
+        message.setFrom("+14155238886");
+
+        final MessageResponse response = twilioSMSService.notifyWhatsappuser(message, traceId);
+        if(response.isStatus()){
+            LOGGER.debug("Successful generating an alert message! traceId is {}", traceId);
+        }else {
+
+            LOGGER.error("Error generating an alert message! traceId is {}", traceId);
+            errorHandler.throwAppException(MessageConstants.CODE_SMS_SEND_ALERTFAILED, AppErrorType.PROVIDER_ERROR, null);
+        }
+
+    }
+
 
 }

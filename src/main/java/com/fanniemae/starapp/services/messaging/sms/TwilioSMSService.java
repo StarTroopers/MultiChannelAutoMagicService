@@ -81,5 +81,20 @@ public class TwilioSMSService extends BaseSMService {
         return response;
     }
 
+    /**
+     * Sends a whatsapp message
+     * @param message
+     * @param traceId
+     * @return
+     */
+    public MessageResponse notifyWhatsappuser(SMSMessage message, String traceId) {
+        LOGGER.info("Notifying user with whatsapp message of {}! traceId of {} ", message , traceId);
+        final TwilioServiceProvider provider = twilioFactory
+                .getProviderService(TwilioProviderFactory.ProviderType.WHATSAPP_ALERT);
+
+        final MessageResponse response = provider.handleMessage(message, traceId);
+        return response;
+    }
+
 
 }

@@ -1,6 +1,7 @@
 package com.fanniemae.starapp.providers.externals.twilio;
 
 import com.fanniemae.starapp.providers.externals.twilio.models.PhoneVerifyResponse;
+import com.twilio.rest.api.v2010.account.MessageCreator;
 import com.twilio.rest.verify.v2.service.Verification;
 import com.twilio.rest.verify.v2.service.VerificationCheck;
 
@@ -25,4 +26,6 @@ public abstract class BaseTwilioServiceProvider implements TwilioServiceProvider
         resp.setStatus(verification.getStatus());
         return resp;
     }
+
+    protected abstract MessageCreator createMessageCreator(String to, String from, String body);
 }

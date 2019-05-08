@@ -7,6 +7,7 @@ import com.fanniemae.starapp.providers.externals.twilio.models.PhoneVerifyRespon
 import com.fanniemae.starapp.providers.externals.twilio.models.SMSMessage;
 import com.twilio.exception.ApiException;
 import com.twilio.http.TwilioRestClient;
+import com.twilio.rest.api.v2010.account.MessageCreator;
 import com.twilio.rest.verify.v2.service.Verification;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -60,6 +61,8 @@ public class TwilioVerifyPhoneProvider extends BaseTwilioServiceProvider {
         return response;
     }
 
-
-
+    @Override
+    protected MessageCreator createMessageCreator(String to, String from, String body) {
+        return null;
+    }
 }

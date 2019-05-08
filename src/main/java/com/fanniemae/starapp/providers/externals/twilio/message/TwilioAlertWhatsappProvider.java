@@ -1,6 +1,5 @@
 package com.fanniemae.starapp.providers.externals.twilio.message;
 
-import com.fanniemae.starapp.providers.externals.twilio.BaseTwilioServiceProvider;
 import com.fanniemae.starapp.providers.externals.twilio.models.MessageResponse;
 import com.fanniemae.starapp.providers.externals.twilio.models.SMSMessage;
 import com.twilio.exception.TwilioException;
@@ -11,49 +10,40 @@ import com.twilio.type.PhoneNumber;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-/**
- * Provides the capability to handle messagge received by the Twilio Number and
- * how twilio responds to the SMS message received.
- *
- */
-public class TwilioAlertSMSProvider extends BaseTwilioServiceProvider {
+public class TwilioAlertWhatsappProvider extends TwilioAlertSMSProvider{
 
-    private static final Logger LOGGER = LogManager.getLogger(TwilioAlertSMSProvider.class);
 
-    protected final TwilioRestClient client;
+    private static final Logger LOGGER = LogManager.getLogger(TwilioAlertWhatsappProvider.class);
+    private static final String WHATSAPP = "whatsapp:";
 
-    public TwilioAlertSMSProvider(TwilioRestClient restClient){
-        this.client = restClient;
+    public TwilioAlertWhatsappProvider(TwilioRestClient client){
+        super(client);
     }
-
 
     @Override
     public MessageResponse handleMessage(SMSMessage message, String traceId) {
-        LOGGER.debug("Sending Twilio SMS Message! traceId is {}", traceId);
+        LOGGER.debug("Sending Twilio Whatsapp Message! traceId is {}", traceId);
 
         final MessageCreator msgCreator = createMessageCreator(message.getTo(), message.getFrom(),
                 message.getBody());
 
-
         final MessageResponse<String> response = new MessageResponse<>();
         try {
-
             final Message msgResponse = msgCreator.create(this.client);
 
-            LOGGER.debug("Response code is {}, Message is {}, traceId is {}",
+            LOGGER.debug("Response code is {}, Whatsapp Message is {}, traceId is {}",
                     msgResponse.getErrorCode(), msgResponse.getErrorMessage(), traceId);
 
             if (msgResponse.getErrorCode() == null && msgResponse.getErrorMessage() == null) {
                 response.setStatus(true);
 
             }else{
-                LOGGER.debug("Error found sending an alert, traceId is {}", traceId);
+                LOGGER.debug("Error found sending a Whatsapp message, traceId is {}", traceId);
                 response.setMessage(msgResponse.getErrorMessage());
             }
 
         } catch (TwilioException ex) {
-            ex.printStackTrace();
-            LOGGER.error("Error sending twilio message of {}. traceId is {}", ex, traceId);
+            LOGGER.error("Error sending Whatsapp message of {}. traceId is {}", ex, traceId);
             response.setStatus(false);
         }
 
@@ -62,6 +52,11 @@ public class TwilioAlertSMSProvider extends BaseTwilioServiceProvider {
 
     @Override
     protected MessageCreator createMessageCreator(String to, String from, String body) {
-        return new MessageCreator(new PhoneNumber(to), new PhoneNumber(from), body);
+
+        final String whatsappTo = WHATSAPP + to;
+        final String whatsappFrom = WHATSAPP + from;
+
+        LOGGER.debug("Sending whatsapp message to {} from {}", whatsappTo, whatsappFrom);
+        return new MessageCreator(new PhoneNumber(whatsappTo), new PhoneNumber(whatsappFrom), body);
     }
 }

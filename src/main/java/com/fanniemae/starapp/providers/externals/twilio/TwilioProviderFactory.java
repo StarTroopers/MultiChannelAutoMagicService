@@ -1,6 +1,7 @@
 package com.fanniemae.starapp.providers.externals.twilio;
 
 import com.fanniemae.starapp.providers.externals.twilio.message.TwilioAlertSMSProvider;
+import com.fanniemae.starapp.providers.externals.twilio.message.TwilioAlertWhatsappProvider;
 import com.fanniemae.starapp.providers.externals.twilio.message.TwilioReplierSMSProvider;
 import com.fanniemae.starapp.providers.externals.twilio.verify.TwilioVerifyPhoneCheckProvider;
 import com.fanniemae.starapp.providers.externals.twilio.verify.TwilioVerifyPhoneProvider;
@@ -36,6 +37,7 @@ public class TwilioProviderFactory {
         final TwilioRestClient client = new TwilioRestClient
                 .Builder(config.getAccountSid(), config.getAccountAuthToken()).build();
 
+        serviceProviders.put(ProviderType.WHATSAPP_ALERT, new TwilioAlertWhatsappProvider(client));
         serviceProviders.put(ProviderType.SMS_ALERT, new TwilioAlertSMSProvider(client));
         serviceProviders.put(ProviderType.SMS_RECEIVE, new TwilioReplierSMSProvider(client));
         serviceProviders.put(ProviderType.SMS_VERIFICATION, new TwilioVerifyPhoneProvider(client,
@@ -53,6 +55,7 @@ public class TwilioProviderFactory {
 
 
     public enum ProviderType{
+        WHATSAPP_ALERT,
         SMS_ALERT,
         SMS_RECEIVE,
         SMS_VERIFICATION,
