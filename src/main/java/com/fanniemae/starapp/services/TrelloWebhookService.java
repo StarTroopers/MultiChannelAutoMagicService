@@ -54,7 +54,7 @@ public class TrelloWebhookService {
                     responseMessage.setTo(multiChnlMsg.getContact());
                     mf = new MessageFormat(messageSource.getMessage("starapp.twillio.commentCard", null, Locale.US));
                     responseMessage.setBody(mf.format(new Object[]{message.getAction().getData().getText(), multiChnlMsg.getId()}));
-                    messageResponseHandler(responseMessage, multiChnlMsg);
+                    messageResponseHandler(responseMessage, multiChnlMsg, "Comment Added to card");
                 } catch (Exception e) {
                 }
                 break;
@@ -66,7 +66,7 @@ public class TrelloWebhookService {
                     responseMessage.setTo(multiChnlMsg.getContact());
                     mf = new MessageFormat(messageSource.getMessage("starapp.twillio.deleteCard", null, Locale.US));
                     responseMessage.setBody(mf.format(new Object[]{multiChnlMsg.getId()}));
-                    messageResponseHandler(responseMessage, multiChnlMsg);
+                    messageResponseHandler(responseMessage, multiChnlMsg, "Card deleted");
                 }catch (Exception e) {
                 }
                 break;
@@ -77,7 +77,7 @@ public class TrelloWebhookService {
                     responseMessage.setTo(multiChnlMsg.getContact());
                     mf = new MessageFormat(messageSource.getMessage("starapp.twillio.updateComment", null, Locale.US));
                     responseMessage.setBody(mf.format(new Object[]{multiChnlMsg.getId(), message.getAction().getData().getAction().getText()}));
-                    messageResponseHandler(responseMessage, multiChnlMsg);
+                    messageResponseHandler(responseMessage, multiChnlMsg, "Card comment updated");
                 }catch (Exception e) {
                 }
                 break;
@@ -88,14 +88,14 @@ public class TrelloWebhookService {
                     responseMessage.setTo(multiChnlMsg.getContact());
                     mf = new MessageFormat(messageSource.getMessage("starapp.twillio.updateCard", null, Locale.US));
                     responseMessage.setBody(mf.format(new Object[]{multiChnlMsg.getId(), message.getAction().getData().getListAfter().getName(), message.getAction().getData().getListBefore().getName()}));
-                    messageResponseHandler(responseMessage, multiChnlMsg);
+                    messageResponseHandler(responseMessage, multiChnlMsg, "Card moved");
                 }catch (Exception e) {
                 }
                 break;
         }
     }
 
-    private void messageResponseHandler(SMSMessage responseMessage, MultiChannelAutoMessage multiChnlMsg) {
+    private void messageResponseHandler(SMSMessage responseMessage, MultiChannelAutoMessage multiChnlMsg, String subject) {
         LOGGER.debug(responseMessage.getBody());
 
         final MessageChannelType type = MessageChannelType.convertType(multiChnlMsg.getChannelType());
@@ -111,7 +111,7 @@ public class TrelloWebhookService {
         }else if (MessageChannelType.EMAIL.equals(type)) {
             List<Customer> customer = customerRepository.findByEmail(multiChnlMsg.getContact());
             responseMessage.setBody("@Fannie Mae at your service \n Dear "+ customer.get(0).getFirstName() + " " + responseMessage.getBody());
-            emailSender.send(new ContactUsBean(multiChnlMsg.getFirstName(), multiChnlMsg.getLastName(), multiChnlMsg.getContact(), responseMessage.getBody(), ""));
+            emailSender.send(new ContactUsBean(multiChnlMsg.getFirstName(), multiChnlMsg.getLastName(), multiChnlMsg.getContact(), responseMessage.getBody(), subject));
         }
     }
 
