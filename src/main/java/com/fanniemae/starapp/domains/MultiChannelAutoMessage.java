@@ -73,11 +73,11 @@ public class MultiChannelAutoMessage {
     }
 
     public void setLastName(String lastName) {
-        this.contact = lastName;
+        this.lastName = lastName;
     }
 
     public void setFirstName(String firstName) {
-        this.contact = firstName;
+        this.firstName = firstName;
     }
 
     public void setId(Long id) {

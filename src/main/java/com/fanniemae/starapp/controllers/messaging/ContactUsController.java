@@ -69,7 +69,7 @@ public class ContactUsController {
         // 2. Respond back to the requester's email using SendGrid implementation.
         // 3. Store the user information as email channel for future communication such as when a trello card gets updated.
 
-        LOGGER.info("{}", message);
+        LOGGER.info("{}", message.toString());
         MultiChannelAutoMessage multiCnlMsg;
         String msgBody = message.getMessage();
         if (msgBody.contains("#")) {
@@ -91,8 +91,9 @@ public class ContactUsController {
             multiCnlMsg.setCardId(card.getId());
             multiCnlMsg.setChannelType(MessageChannelType.EMAIL.getTypeValue());
             multiCnlMsg.setContact(message.getEmail());
-            multiCnlMsg.setLastName(message.getLastName());
-            multiCnlMsg.setFirstName(message.getFirstName());
+            multiCnlMsg.setLastName(customers.get(0).getLastName());
+            multiCnlMsg.setFirstName(customers.get(0).getFirstName());
+            LOGGER.debug(multiCnlMsg.getContact());
             multiCnlMsg = multiChannelAutoMessageRepository.save(multiCnlMsg);
             MessageFormat mf = new MessageFormat(messageSource.getMessage("starapp.twillio.acknoledgement", null, Locale.US));
             message.setMessage(mf.format(new Object[]{multiCnlMsg.getId()}));
