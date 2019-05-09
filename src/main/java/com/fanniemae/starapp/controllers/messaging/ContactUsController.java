@@ -14,6 +14,7 @@ import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.MessageSource;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.ResourceUtils;
@@ -98,7 +99,7 @@ public class ContactUsController {
             MessageFormat mf = new MessageFormat(messageSource.getMessage("starapp.twillio.acknoledgement", null, Locale.US));
             message.setMessage(mf.format(new Object[]{multiCnlMsg.getId()}));
             try {
-                File file  = ResourceUtils.getFile("classpath:images/EMAIL_icon.png");
+                File file  = ResourceUtils.getFile("/var/app/current/EMAIL_icon.png");
                 LOGGER.debug("Attachment Name: "+ file.getAbsolutePath() + file.length());
                 trelloApi.addAttachmentToCard(card.getId(), file);
             } catch(Exception e){

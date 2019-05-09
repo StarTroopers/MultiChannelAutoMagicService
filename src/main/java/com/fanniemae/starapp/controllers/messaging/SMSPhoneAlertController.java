@@ -27,9 +27,7 @@ import org.springframework.util.ResourceUtils;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 
@@ -92,7 +90,6 @@ public class SMSPhoneAlertController extends BaseAppController {
         smsMessage.setFrom(extractNumber(message.get("From")));
         smsMessage.setTo(extractNumber(message.get("To")));
 
-
         //Only SMS provided
         smsMessage.setSmsStatus(message.get("received"));
         smsMessage.setFromCity(message.get("FromCity"));
@@ -131,12 +128,14 @@ public class SMSPhoneAlertController extends BaseAppController {
             multiCnlMsg = new MultiChannelAutoMessage();
             multiCnlMsg.setAccountsSid(smsMessage.getAccountSid());
             multiCnlMsg.setCardId(card.getId());
+            multiCnlMsg.setFirstName(customers.get(0).getFirstName());
+            multiCnlMsg.setLastName(customers.get(0).getLastName());
             multiCnlMsg.setChannelType( (isWhatsAppNumber(message.get("From")) &&  isWhatsAppNumber(message.get("To")))
                     ? MessageChannelType.WHATSAPP.getTypeValue() : MessageChannelType.SMS.getTypeValue() );
             multiCnlMsg.setContact(smsMessage.getFrom());
             multiCnlMsg = multiChannelAutoMessageRepository.save(multiCnlMsg);
             try {
-                File file  = ResourceUtils.getFile("classpath:images/"+multiCnlMsg.getChannelType()+"_icon.png");
+                File file  = ResourceUtils.getFile("/var/app/current/"+multiCnlMsg.getChannelType()+"_icon.png");
                 LOGGER.debug("Attachment Name: "+ file.getAbsolutePath() + file.length());
                 trelloApi.addAttachmentToCard(card.getId(), file);
             } catch(Exception e){
