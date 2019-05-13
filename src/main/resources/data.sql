@@ -11,4 +11,5 @@ INSERT INTO customer(id, first_name, last_name, email, phone, screen_name, org) 
 INSERT INTO customer(id, first_name, last_name, email, phone, screen_name, org) VALUES (9, 'Aliasgar', 'Kagalwala', 'aliasgar.kagalwala@gmail.com', '+18173190650','@Aliasgar', 'Ellie Mae');
 INSERT INTO customer(id, first_name, last_name, email, phone, screen_name, org) VALUES (10, 'Demo', 'User', 'startroopers2019@gmail.com', '+14693889579','@DemoUser', 'Ellie Mae');
 INSERT INTO customer(id, first_name, last_name, email, phone, screen_name, org) VALUES (11, 'RR', 'Rivera', 'rr.rivs@gmail.com', '+12108170578','@RyanRivera', 'Capital One');
+INSERT INTO customer(id, first_name, last_name, email, phone, screen_name, org) VALUES (12, 'Daniela', 'Gonzalez', 'Daniela.Gonzalez@gmail.com', '+14694281922','@DanielaGonzalez', 'Capital One');
 
