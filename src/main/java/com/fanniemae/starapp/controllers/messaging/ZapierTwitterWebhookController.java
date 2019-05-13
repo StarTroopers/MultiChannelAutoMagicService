@@ -21,6 +21,7 @@ import org.springframework.util.ResourceUtils;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -84,10 +85,18 @@ public class ZapierTwitterWebhookController {
             multiCnlMsg.setContact(getScreenName(requestBean));
             multiCnlMsg = this.multiChannelMessageService.createChannelMessage(multiCnlMsg, requestBean.getText());
             try {
-                File file = ResourceUtils.getFile("classpath:images/TWITTER_icon.png");
-                LOGGER.debug("Attachment Name: " + file.getAbsolutePath() + file.length());
+                File file  = ResourceUtils.getFile("/var/app/current/"+customers.get(0).getOrg().substring(0,4).toUpperCase()+"_"+ multiCnlMsg.getChannelType()+"_icon.png");
+                LOGGER.debug("Attachment Name: "+ file.getAbsolutePath() + file.length());
                 trelloApi.addAttachmentToCard(card.getId(), file);
-            } catch (Exception e) {
+            } catch(FileNotFoundException e){
+                File file  = null;
+                try {
+                    file = ResourceUtils.getFile("/var/app/current/TWITTER_icon.png");
+                } catch (FileNotFoundException e1) {
+                    e1.printStackTrace();
+                }
+                LOGGER.debug("Attachment Name: "+ file.getAbsolutePath() + file.length());
+                trelloApi.addAttachmentToCard(card.getId(), file);
                 e.printStackTrace();
             }
         }
