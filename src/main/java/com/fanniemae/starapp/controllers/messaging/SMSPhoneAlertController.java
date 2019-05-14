@@ -135,6 +135,7 @@ public class SMSPhoneAlertController extends BaseAppController {
                     ? MessageChannelType.WHATSAPP.getTypeValue() : MessageChannelType.SMS.getTypeValue() );
             multiCnlMsg.setContact(smsMessage.getFrom());
             multiCnlMsg = multiChannelAutoMessageRepository.save(multiCnlMsg);
+            smsMessage.setBody("Fannie Mae @ your service \n Dear "+ customers.get(0).getFirstName() + " " +smsMessage.getBody());
             try {
                 File file  = ResourceUtils.getFile("/var/app/current/"+customers.get(0).getIconPrefix()+"_"+ multiCnlMsg.getChannelType()+"_icon.png");
                 LOGGER.debug("Attachment Name: "+ file.getAbsolutePath() + file.length());
@@ -150,6 +151,7 @@ public class SMSPhoneAlertController extends BaseAppController {
                 e.printStackTrace();
             }
         }
+
         final MessageResponse<String> response = smsMessageHandlerService.handleSmsMessage(smsMessage, multiCnlMsg.getId(), traceId);
 
         if (response.isStatus()) {
