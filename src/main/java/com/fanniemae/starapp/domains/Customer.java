@@ -15,6 +15,7 @@ public class Customer {
     private String phone;
     private String screenName;
     private String org;
+    private String iconPrefix;
 
     public Long getId() {
         return id;
@@ -71,4 +72,8 @@ public class Customer {
     public void setScreenName(String screenName) {
         this.screenName = screenName;
     }
+
+    public String getIconPrefix() { return iconPrefix; }
+
+    public void setIconPrefix(String iconPrefix) { this.iconPrefix = iconPrefix; }
 }

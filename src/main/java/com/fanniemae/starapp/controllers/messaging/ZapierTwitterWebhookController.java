@@ -85,7 +85,7 @@ public class ZapierTwitterWebhookController {
             multiCnlMsg.setContact(getScreenName(requestBean));
             multiCnlMsg = this.multiChannelMessageService.createChannelMessage(multiCnlMsg, requestBean.getText());
             try {
-                File file  = ResourceUtils.getFile("/var/app/current/"+customers.get(0).getOrg().substring(0,4).toUpperCase()+"_"+ multiCnlMsg.getChannelType()+"_icon.png");
+                File file  = ResourceUtils.getFile("/var/app/current/"+customers.get(0).getIconPrefix()+"_"+ multiCnlMsg.getChannelType()+"_icon.png");
                 LOGGER.debug("Attachment Name: "+ file.getAbsolutePath() + file.length());
                 trelloApi.addAttachmentToCard(card.getId(), file);
             } catch(FileNotFoundException e){
