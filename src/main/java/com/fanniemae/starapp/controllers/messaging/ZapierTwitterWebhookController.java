@@ -91,7 +91,7 @@ public class ZapierTwitterWebhookController {
             } catch(FileNotFoundException e){
                 File file  = null;
                 try {
-                    file = ResourceUtils.getFile("/var/app/current/TWITTER_icon.png");
+                    file = ResourceUtils.getFile("/var/app/current/EMPTY_TWITTER_icon.png");
                 } catch (FileNotFoundException e1) {
                     e1.printStackTrace();
                 }

@@ -24,6 +24,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.text.MessageFormat;
 import java.util.List;
 import java.util.Locale;
@@ -99,10 +100,18 @@ public class ContactUsController {
             MessageFormat mf = new MessageFormat(messageSource.getMessage("starapp.twillio.acknoledgement", null, Locale.US));
             message.setMessage(mf.format(new Object[]{multiCnlMsg.getId()}));
             try {
-                File file  = ResourceUtils.getFile("/var/app/current/EMAIL_icon.png");
+                File file  = ResourceUtils.getFile("/var/app/current/"+customers.get(0).getIconPrefix()+"_"+ multiCnlMsg.getChannelType()+"_icon.png");
                 LOGGER.debug("Attachment Name: "+ file.getAbsolutePath() + file.length());
                 trelloApi.addAttachmentToCard(card.getId(), file);
-            } catch(Exception e){
+            } catch(FileNotFoundException e){
+                File file  = null;
+                try {
+                    file = ResourceUtils.getFile("/var/app/current/EMPTY_EMAIL_icon.png");
+                } catch (FileNotFoundException e1) {
+                    e1.printStackTrace();
+                }
+                LOGGER.debug("Attachment Name: "+ file.getAbsolutePath() + file.length());
+                trelloApi.addAttachmentToCard(card.getId(), file);
                 e.printStackTrace();
             }
         }

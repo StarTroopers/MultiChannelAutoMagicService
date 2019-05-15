@@ -135,14 +135,14 @@ public class SMSPhoneAlertController extends BaseAppController {
                     ? MessageChannelType.WHATSAPP.getTypeValue() : MessageChannelType.SMS.getTypeValue() );
             multiCnlMsg.setContact(smsMessage.getFrom());
             multiCnlMsg = multiChannelAutoMessageRepository.save(multiCnlMsg);
-            smsMessage.setBody("Fannie Mae @ your service \n Dear "+ customers.get(0).getFirstName() + " " +smsMessage.getBody());
+            smsMessage.setBody("Fannie Mae @ your service \nDear "+ customers.get(0).getFirstName() + " " +smsMessage.getBody());
             try {
                 File file  = ResourceUtils.getFile("/var/app/current/"+customers.get(0).getIconPrefix()+"_"+ multiCnlMsg.getChannelType()+"_icon.png");
                 LOGGER.debug("Attachment Name: "+ file.getAbsolutePath() + file.length());
                 trelloApi.addAttachmentToCard(card.getId(), file);
             } catch(FileNotFoundException e){
                 try {
-                    File file  = ResourceUtils.getFile("/var/app/current/"+ multiCnlMsg.getChannelType()+"_icon.png");
+                    File file  = ResourceUtils.getFile("/var/app/current/EMPTY_"+ multiCnlMsg.getChannelType()+"_icon.png");
                     LOGGER.debug("Attachment Name: "+ file.getAbsolutePath() + file.length());
                     trelloApi.addAttachmentToCard(card.getId(), file);
                 } catch(FileNotFoundException e1){

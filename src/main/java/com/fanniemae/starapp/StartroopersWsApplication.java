@@ -26,7 +26,7 @@ public class StartroopersWsApplication {
     public static void main(String[] args) {
         LOGGER.info("####### Starting Star Troopers Application #######");
 
-        String[] orgs = {"CHASE", "CAPONE", "ELLI", "WELLS", "BOFA"};
+        String[] orgs = {"CHASE", "CAPONE", "ELLI", "WELLS", "BOFA","EMPTY"};
         String[] channels = new String[]{"EMAIL", "FACEBOOK", "SMS", "TWITTER", "WHATSAPP"};
         for (String org : orgs) {
             for (String channel : channels) {
