@@ -74,6 +74,7 @@ public class ContactUsController {
         LOGGER.info("{}", message.toString());
         MultiChannelAutoMessage multiCnlMsg;
         String msgBody = message.getMessage();
+        List<Customer> customers = customerRepository.findByEmail(message.getEmail());
         if (msgBody.contains("#")) {
             int hashIndex = msgBody.indexOf("#");
             Long msgId = Long.parseLong(msgBody.substring(hashIndex + 1, msgBody.indexOf(" ", hashIndex)));
@@ -81,9 +82,9 @@ public class ContactUsController {
             multiCnlMsg = multiChannelAutoMessages.get();
             trelloApi.addCommentToCard(multiCnlMsg.getCardId(), message.getMessage().replace("#" + msgId, ""));
             MessageFormat mf = new MessageFormat(messageSource.getMessage("starapp.twillio.acknoledgeupdate", null, Locale.US));
-            message.setMessage(mf.format(new Object[]{multiCnlMsg.getId()}));
+            message.setMessage("Fannie Mae @ your service: \nDear "+ customers.get(0).getFirstName() + " " +mf.format(new Object[]{multiCnlMsg.getId()}));
         } else {
-            List<Customer> customers = customerRepository.findByEmail(message.getEmail());
+
             Card card = new Card();
             card.setName(message.getSubject());
             card.setDesc("Organization: " + customers.get(0).getOrg() +" Name: "+  customers.get(0).getLastName()+ "," +customers.get(0).getFirstName()+ " Contact:" +message.getEmail()+ "\n\n" +message.getMessage());
@@ -98,7 +99,7 @@ public class ContactUsController {
             LOGGER.debug(multiCnlMsg.getContact());
             multiCnlMsg = multiChannelAutoMessageRepository.save(multiCnlMsg);
             MessageFormat mf = new MessageFormat(messageSource.getMessage("starapp.twillio.acknoledgement", null, Locale.US));
-            message.setMessage(mf.format(new Object[]{multiCnlMsg.getId()}));
+            message.setMessage("Fannie Mae @ your service: \nDear "+ customers.get(0).getFirstName() + " " +mf.format(new Object[]{multiCnlMsg.getId()}));
             try {
                 File file  = ResourceUtils.getFile("/var/app/current/"+customers.get(0).getIconPrefix()+"_"+ multiCnlMsg.getChannelType()+"_icon.png");
                 LOGGER.debug("Attachment Name: "+ file.getAbsolutePath() + file.length());

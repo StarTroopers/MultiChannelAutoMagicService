@@ -105,22 +105,22 @@ public class SMSPhoneAlertController extends BaseAppController {
         smsMessage.setChannel( (isWhatsAppNumber(message.get("From")) &&  isWhatsAppNumber(message.get("To")))
                 ? MessageChannelType.WHATSAPP.getTypeValue() : MessageChannelType.SMS.getTypeValue() );
 
-
         smsMessageBeanRepository.save(smsMessage);
 
         LOGGER.info("{}", smsMessage);
         MultiChannelAutoMessage multiCnlMsg;
         String msgBody = smsMessage.getBody();
-
+        List<Customer> customers = customerRepository.findByPhone(smsMessage.getFrom());
+        boolean isNew = false;
         if (msgBody.contains("#")) {
             int hashIndex = msgBody.indexOf("#");
             Long msgId = Long.parseLong(msgBody.substring(hashIndex + 1, msgBody.indexOf(" ", hashIndex)));
             Optional<MultiChannelAutoMessage> multiChannelAutoMessages = multiChannelAutoMessageRepository.findById(msgId);
             multiCnlMsg = multiChannelAutoMessages.get();
             trelloApi.addCommentToCard(multiCnlMsg.getCardId(), smsMessage.getBody().replace("#" + msgId, ""));
-
+            smsMessage.setBody("Fannie Mae @ your service: \nDear "+ customers.get(0).getFirstName() + " " +smsMessage.getBody());
         } else {
-            List<Customer> customers = customerRepository.findByPhone(smsMessage.getFrom());
+            isNew = true;
             Card card = new Card();
             card.setName(smsMessage.getBody());
             card.setDesc("Organization: " + customers.get(0).getOrg() +" Name: "+  customers.get(0).getLastName()+ "," +customers.get(0).getFirstName()+ " Contact:" +smsMessage.getFrom()+ "\n\n" +  smsMessage.getBody());
@@ -135,7 +135,7 @@ public class SMSPhoneAlertController extends BaseAppController {
                     ? MessageChannelType.WHATSAPP.getTypeValue() : MessageChannelType.SMS.getTypeValue() );
             multiCnlMsg.setContact(smsMessage.getFrom());
             multiCnlMsg = multiChannelAutoMessageRepository.save(multiCnlMsg);
-            smsMessage.setBody("Fannie Mae @ your service \nDear "+ customers.get(0).getFirstName() + " " +smsMessage.getBody());
+            smsMessage.setBody("Fannie Mae @ your service: \nDear "+ customers.get(0).getFirstName() + " " +smsMessage.getBody());
             try {
                 File file  = ResourceUtils.getFile("/var/app/current/"+customers.get(0).getIconPrefix()+"_"+ multiCnlMsg.getChannelType()+"_icon.png");
                 LOGGER.debug("Attachment Name: "+ file.getAbsolutePath() + file.length());
@@ -152,7 +152,7 @@ public class SMSPhoneAlertController extends BaseAppController {
             }
         }
 
-        final MessageResponse<String> response = smsMessageHandlerService.handleSmsMessage(smsMessage, multiCnlMsg.getId(), traceId);
+        final MessageResponse<String> response = smsMessageHandlerService.handleSmsMessage(smsMessage, multiCnlMsg.getId(), traceId, isNew);
 
         if (response.isStatus()) {
             LOGGER.debug("Successful handling SMS Message from mobile! traceId is {}", traceId);
