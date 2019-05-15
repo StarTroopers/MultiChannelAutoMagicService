@@ -102,15 +102,15 @@ public class TrelloWebhookService {
 
         if (MessageChannelType.SMS.equals(type)) {
             List<Customer> customer = customerRepository.findByPhone(multiChnlMsg.getContact());
-            responseMessage.setBody("Fannie Mae @ your service \n Dear "+ customer.get(0).getFirstName() + " " + responseMessage.getBody());
+            responseMessage.setBody("Fannie Mae @ your service: \nDear "+ customer.get(0).getFirstName() + " " + responseMessage.getBody());
             twilioSMSService.notifyUser(responseMessage, null);
         }else if (MessageChannelType.WHATSAPP.equals(type)) {
             List<Customer> customer = customerRepository.findByPhone(multiChnlMsg.getContact());
-            responseMessage.setBody("Fannie Mae @ your service \n Dear " + customer.get(0).getFirstName() + " " + responseMessage.getBody());
+            responseMessage.setBody("Fannie Mae @ your service: \nDear " + customer.get(0).getFirstName() + " " + responseMessage.getBody());
             twilioSMSService.notifyWhatsappuser(responseMessage, null);
         }else if (MessageChannelType.EMAIL.equals(type)) {
             List<Customer> customer = customerRepository.findByEmail(multiChnlMsg.getContact());
-            responseMessage.setBody("Fannie Mae @ your service \n Dear "+ customer.get(0).getFirstName() + " " + responseMessage.getBody());
+            responseMessage.setBody("Fannie Mae @ your service: \nDear "+ customer.get(0).getFirstName() + " " + responseMessage.getBody());
             emailSender.send(new ContactUsBean(multiChnlMsg.getFirstName(), multiChnlMsg.getLastName(), multiChnlMsg.getContact(), responseMessage.getBody(), subject));
         }
     }
