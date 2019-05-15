@@ -24,7 +24,13 @@ public class TwilioAlertWhatsappProvider extends TwilioAlertSMSProvider{
     public MessageResponse handleMessage(SMSMessage message, String traceId) {
         LOGGER.debug("Sending Twilio Whatsapp Message! traceId is {}", traceId);
 
+
+        /*
         final MessageCreator msgCreator = createMessageCreator(message.getTo(), message.getFrom(),
+                message.getBody());
+                */
+        //Hard code using the whatsapp number
+        final MessageCreator msgCreator = createMessageCreator(message.getTo(), "+14155238886",
                 message.getBody());
 
         final MessageResponse<String> response = new MessageResponse<>();
