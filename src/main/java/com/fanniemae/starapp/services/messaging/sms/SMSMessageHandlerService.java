@@ -33,16 +33,11 @@ public class SMSMessageHandlerService extends BaseSMService {
      * @param request
      * @param traceId
      */
-    public MessageResponse handleSmsMessage(final SMSMessageRequest request, Long requestId, String traceId, boolean isNew, String msgPrefix ) {
+    public MessageResponse handleSmsMessage(final SMSMessageRequest request, Long requestId, String traceId, String msgPrefix ) {
         LOGGER.info("Creating an SMS Message log. traceId of {}", traceId);
-
-
-
 
         //TODO: NEED TO STORE THE REQUEST IN DB. INVOKE DAO HERE
         final boolean result = true; //smsMessageLogDao.createMessageLog(request, traceId);
-
-
 
         if (result) {
 
@@ -50,12 +45,10 @@ public class SMSMessageHandlerService extends BaseSMService {
 
             //TODO: Need to invoke message body processing
 
-
             SMSMessage successReply = new SMSMessageRequest();
-            MessageFormat mf = new MessageFormat(messageSource.getMessage((isNew)?"starapp.twillio.acknoledgement":"starapp.twillio.acknoledgeupdate", null, Locale.US));
+            MessageFormat mf = new MessageFormat(messageSource.getMessage("starapp.twillio.acknoledgement", null, Locale.US));
             successReply.setBody(msgPrefix +" "+ mf.format(new Object[]{requestId}));
             return twilioSMSService.generateSMSReply(successReply, traceId);
-
 
         } else {
             // Will not throw an error but generate an error message as response
@@ -65,6 +58,5 @@ public class SMSMessageHandlerService extends BaseSMService {
         }
 
     }
-
 
 }

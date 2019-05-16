@@ -23,6 +23,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
 import org.springframework.util.ResourceUtils;
 import org.springframework.web.bind.annotation.*;
 
@@ -77,7 +78,7 @@ public class SMSPhoneAlertController extends BaseAppController {
         LOGGER.debug("Handling SMS Message from mobile!");
 
         final SMSMessageRequest smsMessage = new SMSMessageRequest();
-        LOGGER.info( "Raw message is {}", message);
+        LOGGER.info("Raw message is {}", message);
 
         //Whatsapp and SMS provided data:
         smsMessage.setSmsMessageSid(message.get("SmsMessageSid"));
@@ -102,8 +103,8 @@ public class SMSPhoneAlertController extends BaseAppController {
         smsMessage.setToState(message.get("ToState"));
         smsMessage.setToZip(message.get("ToZip"));
 
-        smsMessage.setChannel( (isWhatsAppNumber(message.get("From")) &&  isWhatsAppNumber(message.get("To")))
-                ? MessageChannelType.WHATSAPP.getTypeValue() : MessageChannelType.SMS.getTypeValue() );
+        smsMessage.setChannel((isWhatsAppNumber(message.get("From")) && isWhatsAppNumber(message.get("To")))
+                ? MessageChannelType.WHATSAPP.getTypeValue() : MessageChannelType.SMS.getTypeValue());
 
         smsMessageBeanRepository.save(smsMessage);
 
@@ -111,8 +112,6 @@ public class SMSPhoneAlertController extends BaseAppController {
         MultiChannelAutoMessage multiCnlMsg;
         String msgBody = smsMessage.getBody();
         List<Customer> customers = customerRepository.findByPhone(smsMessage.getFrom());
-        boolean isNew = false;
-        String msgPrefix = "Fannie Mae @ your service: \nDear "+ customers.get(0).getFirstName();
         if (msgBody.contains("#")) {
             int hashIndex = msgBody.indexOf("#");
             Long msgId = Long.parseLong(msgBody.substring(hashIndex + 1, msgBody.indexOf(" ", hashIndex)));
@@ -121,10 +120,9 @@ public class SMSPhoneAlertController extends BaseAppController {
             LOGGER.debug("Update received from Customer. Message:" + multiCnlMsg);
             trelloApi.addCommentToCard(multiCnlMsg.getCardId(), smsMessage.getBody().replace("#" + msgId, ""));
         } else {
-            isNew = true;
             Card card = new Card();
             card.setName(smsMessage.getBody());
-            card.setDesc("Organization: " + customers.get(0).getOrg() +"\nName: "+  customers.get(0).getLastName()+ "," +customers.get(0).getFirstName()+ "\nContact:" +smsMessage.getFrom()+ "\n\n" +  smsMessage.getBody());
+            card.setDesc("Organization: " + customers.get(0).getOrg() + "\nName: " + customers.get(0).getLastName() + "," + customers.get(0).getFirstName() + "\nContact:" + smsMessage.getFrom() + "\n\n" + smsMessage.getBody());
             card = trelloApi.createCard(idlist, card);
 
             multiCnlMsg = new MultiChannelAutoMessage();
@@ -132,47 +130,45 @@ public class SMSPhoneAlertController extends BaseAppController {
             multiCnlMsg.setCardId(card.getId());
             multiCnlMsg.setFirstName(customers.get(0).getFirstName());
             multiCnlMsg.setLastName(customers.get(0).getLastName());
-            multiCnlMsg.setChannelType( (isWhatsAppNumber(message.get("From")) &&  isWhatsAppNumber(message.get("To")))
-                    ? MessageChannelType.WHATSAPP.getTypeValue() : MessageChannelType.SMS.getTypeValue() );
+            multiCnlMsg.setChannelType((isWhatsAppNumber(message.get("From")) && isWhatsAppNumber(message.get("To")))
+                    ? MessageChannelType.WHATSAPP.getTypeValue() : MessageChannelType.SMS.getTypeValue());
             multiCnlMsg.setContact(smsMessage.getFrom());
             multiCnlMsg = multiChannelAutoMessageRepository.save(multiCnlMsg);
-            LOGGER.debug("Message saved: "+multiCnlMsg);
+            LOGGER.debug("Message saved: " + multiCnlMsg);
             try {
-                File file  = ResourceUtils.getFile("/var/app/current/"+customers.get(0).getIconPrefix()+"_"+ multiCnlMsg.getChannelType()+"_icon.png");
-                LOGGER.debug("Attachment Name: "+ file.getAbsolutePath() + file.length());
+                File file = ResourceUtils.getFile("/var/app/current/" + customers.get(0).getIconPrefix() + "_" + multiCnlMsg.getChannelType() + "_icon.png");
+                LOGGER.debug("Attachment Name: " + file.getAbsolutePath() + file.length());
                 trelloApi.addAttachmentToCard(card.getId(), file);
-            } catch(FileNotFoundException e){
+            } catch (FileNotFoundException e) {
                 try {
-                    File file  = ResourceUtils.getFile("/var/app/current/EMPTY_"+ multiCnlMsg.getChannelType()+"_icon.png");
-                    LOGGER.debug("Attachment Name: "+ file.getAbsolutePath() + file.length());
+                    File file = ResourceUtils.getFile("/var/app/current/EMPTY_" + multiCnlMsg.getChannelType() + "_icon.png");
+                    LOGGER.debug("Attachment Name: " + file.getAbsolutePath() + file.length());
                     trelloApi.addAttachmentToCard(card.getId(), file);
-                } catch(FileNotFoundException e1){
+                } catch (FileNotFoundException e1) {
                 }
             }
+            String msgPrefix = "Fannie Mae @ your service: \nDear " + customers.get(0).getFirstName();
+            final MessageResponse<String> response = smsMessageHandlerService.handleSmsMessage(smsMessage, multiCnlMsg.getId(), traceId, msgPrefix);
+
+            if (response.isStatus()) {
+                LOGGER.debug("Successful handling SMS Message from mobile! traceId is {}", traceId);
+                return response.getContent();
+            }
         }
-
-        final MessageResponse<String> response = smsMessageHandlerService.handleSmsMessage(smsMessage, multiCnlMsg.getId(), traceId, isNew, msgPrefix);
-
-        if (response.isStatus()) {
-            LOGGER.debug("Successful handling SMS Message from mobile! traceId is {}", traceId);
-            return response.getContent();
-        }
-        return null;
-
+        return "Success";
     }
 
 
-    private boolean isWhatsAppNumber(String sourceNumber){
+    private boolean isWhatsAppNumber(String sourceNumber) {
         return sourceNumber.startsWith(WHATSAPP_PREFIX);
     }
 
-    private String extractNumber(String phoneNumber){
-        if(isWhatsAppNumber(phoneNumber)){
+    private String extractNumber(String phoneNumber) {
+        if (isWhatsAppNumber(phoneNumber)) {
             return phoneNumber.substring(WHATSAPP_PREFIX.length());
         }
         return phoneNumber;
     }
-
 
     @PostMapping(value = "/send-alert")
     @SMSFeatureDoc(value = "Sends a message to a given phone number")
@@ -202,16 +198,15 @@ public class SMSPhoneAlertController extends BaseAppController {
             LOGGER.error("Error generating an alert message! traceId is {}", traceId);
             errorHandler.throwAppException(MessageConstants.CODE_SMS_SEND_ALERTFAILED, AppErrorType.PROVIDER_ERROR, null);
         }
-
     }
 
     @PostMapping(value = "/notify-whatsapp")
     public void sendWhatsappAlertMessage(@RequestBody SMSMessageBean messageRqst,
-                                         @RequestHeader(name = AppHttpHeaders.TRACEID_HEADER, required = false) String traceId){
+                                         @RequestHeader(name = AppHttpHeaders.TRACEID_HEADER, required = false) String traceId) {
 
         LOGGER.debug("Sending a whatsapp message! traceId of {}", traceId);
 
-        if(messageRqst == null || messageRqst.getMessage() == null || messageRqst.getToPhoneNumber() == null){
+        if (messageRqst == null || messageRqst.getMessage() == null || messageRqst.getToPhoneNumber() == null) {
             errorHandler.throwAppException(MessageConstants.CODE_INCOMPLETE_REQUEST_ERROR, AppErrorType.REQUEST_ERROR, null);
         }
 
@@ -223,15 +218,13 @@ public class SMSPhoneAlertController extends BaseAppController {
         message.setFrom("+14155238886");
 
         final MessageResponse response = twilioSMSService.notifyWhatsappuser(message, traceId);
-        if(response.isStatus()){
+        if (response.isStatus()) {
             LOGGER.debug("Successful generating an alert message! traceId is {}", traceId);
-        }else {
+        } else {
 
             LOGGER.error("Error generating an alert message! traceId is {}", traceId);
             errorHandler.throwAppException(MessageConstants.CODE_SMS_SEND_ALERTFAILED, AppErrorType.PROVIDER_ERROR, null);
         }
 
     }
-
-
 }
