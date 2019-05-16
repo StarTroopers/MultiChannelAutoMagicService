@@ -33,7 +33,7 @@ public class SMSMessageHandlerService extends BaseSMService {
      * @param request
      * @param traceId
      */
-    public MessageResponse handleSmsMessage(final SMSMessageRequest request, Long requestId, String traceId, boolean isNew ) {
+    public MessageResponse handleSmsMessage(final SMSMessageRequest request, Long requestId, String traceId, boolean isNew, String msgPrefix ) {
         LOGGER.info("Creating an SMS Message log. traceId of {}", traceId);
 
 
@@ -51,9 +51,9 @@ public class SMSMessageHandlerService extends BaseSMService {
             //TODO: Need to invoke message body processing
 
 
-            final SMSMessage successReply = new SMSMessageRequest();
+            SMSMessage successReply = new SMSMessageRequest();
             MessageFormat mf = new MessageFormat(messageSource.getMessage((isNew)?"starapp.twillio.acknoledgement":"starapp.twillio.acknoledgeupdate", null, Locale.US));
-            successReply.setBody(mf.format(new Object[]{requestId}));
+            successReply.setBody(msgPrefix +" "+ mf.format(new Object[]{requestId}));
             return twilioSMSService.generateSMSReply(successReply, traceId);
 
 

@@ -74,8 +74,8 @@ public class ZapierTwitterWebhookController {
             List<Customer> customers = customerRepository.findByScreenName(getScreenName(requestBean));
             Card card = new Card();
             card.setName(requestBean.getText());
-            card.setDesc("Organization: " + customers.get(0).getOrg() + " Name: " + customers.get(0).getLastName()
-                    + "," + customers.get(0).getFirstName() + " Contact:" + getScreenName(requestBean) + "\n\n" + requestBean.getText());
+            card.setDesc("Organization: " + customers.get(0).getOrg() + "\nName: " + customers.get(0).getLastName()
+                    + "," + customers.get(0).getFirstName() + "\nContact:" + getScreenName(requestBean) + "\n\n" + requestBean.getText());
             card = trelloApi.createCard(idlist, card);
 
             multiCnlMsg = new MultiChannelAutoMessage();

@@ -87,7 +87,7 @@ public class ContactUsController {
 
             Card card = new Card();
             card.setName(message.getSubject());
-            card.setDesc("Organization: " + customers.get(0).getOrg() +" Name: "+  customers.get(0).getLastName()+ "," +customers.get(0).getFirstName()+ " Contact:" +message.getEmail()+ "\n\n" +message.getMessage());
+            card.setDesc("Organization: " + customers.get(0).getOrg() +"\nName: "+  customers.get(0).getLastName()+ "," +customers.get(0).getFirstName()+ "\nContact:" +message.getEmail()+ "\n\n" +message.getMessage());
             card = trelloApi.createCard(idlist, card);
 
             multiCnlMsg = new MultiChannelAutoMessage();
