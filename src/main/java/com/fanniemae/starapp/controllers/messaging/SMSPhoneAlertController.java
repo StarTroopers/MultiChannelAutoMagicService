@@ -32,6 +32,8 @@ import java.io.FileNotFoundException;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 @RestController
 @RequestMapping("/sms-alert")
@@ -113,8 +115,12 @@ public class SMSPhoneAlertController extends BaseAppController {
         String msgBody = smsMessage.getBody();
         List<Customer> customers = customerRepository.findByPhone(smsMessage.getFrom());
         if (msgBody.contains("#")) {
-            int hashIndex = msgBody.indexOf("#");
-            Long msgId = Long.parseLong(msgBody.substring(hashIndex + 1, msgBody.indexOf(" ", hashIndex)));
+            Long msgId=0L;
+            Pattern pattern = Pattern.compile("#[0-9]+");
+            Matcher matcher = pattern.matcher(msgBody);
+            while (matcher.find()) {
+                msgId = Long.parseLong(matcher.group().substring(1));
+            }
             Optional<MultiChannelAutoMessage> multiChannelAutoMessages = multiChannelAutoMessageRepository.findById(msgId);
             multiCnlMsg = multiChannelAutoMessages.get();
             LOGGER.debug("Update received from Customer. Message:" + multiCnlMsg);
